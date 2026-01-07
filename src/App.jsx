@@ -787,12 +787,9 @@ function App() {
 
             {/* Mail Inboxes */}
 	    {activeView === VIEW.MAIL && (
-	      <>
               <View padding="size-50">
-                <Heading level={3}>Mailboxes</Heading>
-	      </View>
-              <EmailListTable />
-              </>
+                <EmailListTable />
+              </View>
             )}
             {/* Mail Inboxes End */}
 

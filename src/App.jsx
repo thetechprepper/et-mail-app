@@ -42,6 +42,7 @@ import MyPosition from './MyPosition.jsx';
 import { bearing, haversineDistance, maidenhead } from './utils/distance';
 
 import { EmailListTable } from "./components/mail";
+import { NavButton } from "./components/navigation";
 
 import './App.css';
 
@@ -63,7 +64,8 @@ function App() {
     MAIL: "mail",
     MAP_SEARCH: "map-search",
     WEATHER: "weather",
-    NOTES: "notes"
+    COMPOSE: "compose",
+    CONNECT: "connect"
   };
 
   const [activeView, setActiveView] = useState(VIEW.MAIL);
@@ -733,59 +735,59 @@ function App() {
           )}
 
           {/* Sidebar */}
-	  <View backgroundColor="gray-100" padding="size-100" width="size-800">
+	  <View backgroundColor="gray-100" padding="size-100" width="size-2000">
             <Flex direction="column" gap="size-200">
 
-              <ActionButton
-                isQuiet
-   	        isSelected={activeView === VIEW.MAIL}
-                onPress={() => setActiveView(VIEW.MAIL)}
-                aria-label="Mail"
-              >
-                <EmailOutline />
-              </ActionButton>
+              <NavButton
+                icon={<EmailOutline />}
+                label="Mail Inboxes"
+                view={VIEW.MAIL}
+                activeView={activeView}
+                setActiveView={setActiveView}
+              />
 
-              <ActionButton
-                isQuiet
-   	        isSelected={activeView === VIEW.NOTES}
-                onPress={() => setActiveView(VIEW.NOTES)}
-                aria-label="Notes"
-              >
-                <AnnotatePen />
-              </ActionButton>
+              <NavButton
+                icon={<AnnotatePen/>}
+                label="Compose Mail"
+                view={VIEW.COMPOSE}
+                activeView={activeView}
+                setActiveView={setActiveView}
+              />
 
-              <ActionButton
-                isQuiet
-   	        isSelected={activeView === VIEW.MAP_SEARCH}
-                onPress={() => setActiveView(VIEW.MAP_SEARCH)}
-                aria-label="Search / Map"
-              >
-                <Magnify />
-              </ActionButton>
+              <NavButton
+                icon={<Magnify/>}
+                label="Find Stations"
+                view={VIEW.MAP_SEARCH}
+                activeView={activeView}
+                setActiveView={setActiveView}
+              />
 
-              <ActionButton
-                isQuiet
-   	        isSelected={activeView === VIEW.WEATHER}
-                onPress={() => setActiveView(VIEW.WEATHER)}
-                aria-label="Weather"
-              >
-                <CloudOutline />
-              </ActionButton>
+              <NavButton
+                icon={<CloudOutline/>}
+                label="U.S. Weather"
+                view={VIEW.WEATHER}
+                activeView={activeView}
+                setActiveView={setActiveView}
+              />
 
-              <ActionButton isQuiet aria-label="Refresh">
-                <EmailRefresh />
-              </ActionButton>
+              <NavButton
+                icon={<EmailRefresh/>}
+                label="Send/Receive"
+                view={VIEW.CONNECT}
+                activeView={activeView}
+                setActiveView={setActiveView}
+              />
             </Flex>
           </View>
           {/* Sidebar End */}
 
 
-          {/* Content Container */}
-	  <View flexGrow={1} overflow="hidden">
+          {/* Content Container overflow="hidden" */}
+	  <View flexGrow={1}>
 
             {/* Mail Inboxes */}
 	    {activeView === VIEW.MAIL && (
-              <View padding="size-200">
+              <View padding="size-400">
                 <Heading level={3}>Inbox</Heading>
                 <EmailListTable />
               </View>
@@ -830,19 +832,32 @@ function App() {
             )}
             {/* Map End */}
 
+            {/* Weather Request */}
 	    {activeView === VIEW.WEATHER && (
               <View padding="size-200">
-                <Heading level={3}>Weather</Heading>
-                <Text>Weather view stub</Text>
+                <Heading level={3}>U.S. Weather Request</Heading>
+                <Text>Request weather from the U.S. National Weather Service (NWS) near your area.</Text>
               </View>
             )}
+            {/* Weather Request End */}
 
-            {activeView === VIEW.NOTES && (
+            {/* Compose Mail */}
+            {activeView === VIEW.COMPOSE && (
               <View padding="size-200">
-                <Heading level={3}>Notes</Heading>
-                <Text>Notes view stub</Text>
+                <Heading level={3}>Compose</Heading>
+                <Text>Compose email view stub</Text>
               </View>
             )}
+            {/* Compose Mail End */}
+
+            {/* Connect */}
+            {activeView === VIEW.CONNECT && (
+              <View padding="size-200">
+                <Heading level={3}>Connect to Winlink Station</Heading>
+                <Text>Connect view stub</Text>
+              </View>
+            )}
+            {/* Connect End */}
 
           </View>
 

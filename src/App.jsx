@@ -27,6 +27,11 @@ import {
   View,
   defaultTheme,
 } from '@adobe/react-spectrum';
+import AnnotatePen from '@spectrum-icons/workflow/AnnotatePen';
+import CloudOutline from '@spectrum-icons/workflow/CloudOutline';
+import EmailOutline from '@spectrum-icons/workflow/EmailOutline';
+import EmailRefresh from '@spectrum-icons/workflow/EmailRefresh';
+import Magnify from '@spectrum-icons/workflow/Magnify';
 import Minimize from '@spectrum-icons/workflow/Minimize';
 import Refresh from '@spectrum-icons/workflow/Refresh';
 import ShowMenu from '@spectrum-icons/workflow/ShowMenu';
@@ -35,6 +40,9 @@ import { isValidLatLon } from './utils';
 import { ADSB_SERVICE, AIRCRAFT_SERVICE, CALLSIGN_SERVICE, GEO_SERVICE, GRID_SERVICE, MAP_SERVICE, VOACAP_SERVICE } from './config';
 import MyPosition from './MyPosition.jsx';
 import { bearing, haversineDistance, maidenhead } from './utils/distance';
+
+import { EmailListTable } from "./components/mail";
+
 import './App.css';
 
 function App() {
@@ -78,6 +86,8 @@ function App() {
   // VOACAP input
   const [power, setPower] = useState("5"); // in watts
   const [mode, setMode] = useState("js8"); // radio mode
+
+  const [MailBoxesOpen, setMailBoxesOpen] = useState(true);
 
   // Handle zoom level based on availability of offline regional vs world map
   const getDefaultZoom = () => 
@@ -362,6 +372,7 @@ function App() {
     <Provider theme={defaultTheme}>
       <Flex direction="column" height="100vh">
         <Flex direction="row" flexGrow={1}>
+
           {/* Sidebar */}
           {sidebarOpen && (
             <View backgroundColor="gray-100" padding="size-200" width="size-4600">
@@ -720,10 +731,21 @@ function App() {
           {!sidebarOpen && (
             <View backgroundColor="gray-100" padding="size-100">
               <Flex direction="column" gap="size-200">
+		<ActionButton>
+		  <EmailOutline/>
+		</ActionButton>
+		<ActionButton>
+		  <AnnotatePen />
+		</ActionButton>
                 <ActionButton onPress={() => setSidebarOpen(true)} aria-label="Show Panel">
-                  <ShowMenu />
+                  <Magnify />
                 </ActionButton>
-                <MyPosition setMyPosition={setMyPosition} setCenter={setCenter} showText={false} />
+		<ActionButton>
+		  <CloudOutline />
+		</ActionButton>
+		<ActionButton>
+		  <EmailRefresh />
+		</ActionButton>
               </Flex>
             </View>
           )}

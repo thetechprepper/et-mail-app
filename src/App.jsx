@@ -43,6 +43,7 @@ import { bearing, haversineDistance, maidenhead } from './utils/distance';
 
 import { EmailListTable } from "./components/mail";
 import { NavButton } from "./components/navigation";
+import { NWSForecastZonesListTable } from "./components/weather";
 
 import './App.css';
 
@@ -836,6 +837,7 @@ function App() {
               <View padding="size-200">
                 <Heading level={3}>U.S. Weather Request</Heading>
                 <Text>Request weather from the U.S. National Weather Service (NWS) near your area.</Text>
+		<NWSForecastZonesListTable/>
               </View>
             )}
             {/* Weather Request End */}

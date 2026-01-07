@@ -66,7 +66,6 @@ function App() {
     NOTES: "notes"
   };
 
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeView, setActiveView] = useState(VIEW.MAIL);
 
 
@@ -384,14 +383,10 @@ function App() {
         <Flex direction="row" flexGrow={1}>
 
           {/* Sidebar */}
-          {sidebarOpen && (
+          {activeView === VIEW.MAP_SEARCH && (
             <View backgroundColor="gray-100" padding="size-200" width="size-4600">
               <Flex direction="column" gap="size-200">
                 <Flex direction="row" gap="size-200" alignItems="center">
-                  <ActionButton onPress={() => setSidebarOpen(false)} aria-label="Hide Panel">
-                    <Minimize />
-                    <Text>Hide</Text>
-                  </ActionButton>
                   <MyPosition setMyPosition={setMyPosition} setCenter={setCenter} showText={true} />
 	          <ActionButton onPress={handleReset}>
 		    <Refresh />

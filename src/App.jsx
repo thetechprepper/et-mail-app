@@ -735,8 +735,10 @@ function App() {
           {/* Sidebar */}
 	  <View backgroundColor="gray-100" padding="size-100" width="size-800">
             <Flex direction="column" gap="size-200">
+
               <ActionButton
                 isQuiet
+   	        isSelected={activeView === VIEW.MAIL}
                 onPress={() => setActiveView(VIEW.MAIL)}
                 aria-label="Mail"
               >
@@ -745,6 +747,7 @@ function App() {
 
               <ActionButton
                 isQuiet
+   	        isSelected={activeView === VIEW.NOTES}
                 onPress={() => setActiveView(VIEW.NOTES)}
                 aria-label="Notes"
               >
@@ -753,6 +756,7 @@ function App() {
 
               <ActionButton
                 isQuiet
+   	        isSelected={activeView === VIEW.MAP_SEARCH}
                 onPress={() => setActiveView(VIEW.MAP_SEARCH)}
                 aria-label="Search / Map"
               >
@@ -761,6 +765,7 @@ function App() {
 
               <ActionButton
                 isQuiet
+   	        isSelected={activeView === VIEW.WEATHER}
                 onPress={() => setActiveView(VIEW.WEATHER)}
                 aria-label="Weather"
               >

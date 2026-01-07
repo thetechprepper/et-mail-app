@@ -5,15 +5,27 @@ import {
   TableBody,
   Column,
   Row,
-  Cell
+  Cell,
+  Picker,
+  Item,
+  View
 } from "@adobe/react-spectrum";
 
+const MAILBOX_ENDPOINTS = {
+  inbox: "http://localhost:8080/api/mailbox/in",
+  outbox: "http://localhost:8080/api/mailbox/out",
+  archived: "http://localhost:8080/api/mailbox/archive"
+};
+
 export default function EmailListTable() {
+  const [mailbox, setMailbox] = useState("inbox");
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://localhost:8080/api/mailbox/in")
+    setLoading(true);
+
+    fetch(MAILBOX_ENDPOINTS[mailbox])
       .then((res) => {
         if (!res.ok) {
           throw new Error("Failed to fetch mailbox");
@@ -30,32 +42,46 @@ export default function EmailListTable() {
       .finally(() => {
         setLoading(false);
       });
-  }, []);
+  }, [mailbox]);
 
   return (
-    <TableView
-      aria-label="Email list"
-      selectionMode="single"
-      isQuiet
-    >
-      <TableHeader>
-        <Column key="from">From</Column>
-        <Column key="subject">Subject</Column>
-        <Column key="date">Date</Column>
-      </TableHeader>
-
-      <TableBody
-        items={messages}
-        loadingState={loading ? "loading" : "idle"}
+    <View>
+      <Picker
+        label="Mailbox"
+        selectedKey={mailbox}
+        onSelectionChange={setMailbox}
+        width="size-2000"
       >
-        {(item) => (
-          <Row key={item.MID}>
-            <Cell>{item.From?.Addr || ""}</Cell>
-            <Cell>{item.Subject || ""}</Cell>
-            <Cell>{item.Date || ""}</Cell>
-          </Row>
-        )}
-      </TableBody>
-    </TableView>
+        <Item key="inbox">Inbox</Item>
+        <Item key="outbox">Outbox</Item>
+        <Item key="archived">Archived</Item>
+      </Picker>
+
+      <TableView
+        aria-label="Email list"
+        selectionMode="single"
+        isQuiet
+        marginTop="size-200"
+      >
+        <TableHeader>
+          <Column key="from">From</Column>
+          <Column key="subject">Subject</Column>
+          <Column key="date">Date</Column>
+        </TableHeader>
+
+        <TableBody
+          items={messages}
+          loadingState={loading ? "loading" : "idle"}
+        >
+          {(item) => (
+            <Row key={item.MID}>
+              <Cell>{item.From?.Addr || ""}</Cell>
+              <Cell>{item.Subject || ""}</Cell>
+              <Cell>{item.Date || ""}</Cell>
+            </Row>
+          )}
+        </TableBody>
+      </TableView>
+    </View>
   );
 }

@@ -787,19 +787,21 @@ function App() {
 
             {/* Mail Inboxes */}
 	    {activeView === VIEW.MAIL && (
-              <View padding="size-400">
-                <Heading level={3}>Inbox</Heading>
-                <EmailListTable />
-              </View>
+	      <>
+              <View padding="size-50">
+                <Heading level={3}>Mailboxes</Heading>
+	      </View>
+              <EmailListTable />
+              </>
             )}
             {/* Mail Inboxes End */}
 
 
-            {/* Map End */}
+            {/* Map */}
 	    {activeView === VIEW.MAP_SEARCH && (
               <>
                 <View backgroundColor="gray-200" borderWidth="thin" borderColor="dark" padding="size-50">
-                  <Text>Your Position: 33.5123,-112.7865</Text>
+                  <Text>Your Position: DEMO</Text>
                 </View>
 
                 <Map

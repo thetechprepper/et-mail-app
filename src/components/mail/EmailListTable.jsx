@@ -1,4 +1,4 @@
-import React from "react";
+import { useEffect, useState } from "react";
 import {
   TableView,
   TableHeader,
@@ -8,47 +8,51 @@ import {
   Cell
 } from "@adobe/react-spectrum";
 
-const EMAILS = [
-  {
-    id: "1",
-    subject: "Test message",
-    from: "info@example.com",
-    date: "2026-01-06"
-  },
-  {
-    id: "2",
-    subject: "System notification",
-    from: "alerts@example.com",
-    date: "2026-01-05"
-  }
-];
-
 export default function EmailListTable() {
+  const [messages, setMessages] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("http://localhost:8080/api/mailbox/in")
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("Failed to fetch mailbox");
+        }
+        return res.json();
+      })
+      .then((data) => {
+        setMessages(Array.isArray(data) ? data : []);
+      })
+      .catch((err) => {
+        console.error(err);
+        setMessages([]);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, []);
+
   return (
     <TableView
       aria-label="Email list"
       selectionMode="single"
-      density="compact"
-      width="100%"
+      isQuiet
     >
       <TableHeader>
-        <Column key="subject" allowsResizing>
-          Subject
-        </Column>
-        <Column key="from" allowsResizing>
-          From
-        </Column>
-        <Column key="date" allowsResizing>
-          Date
-        </Column>
+        <Column key="from">From</Column>
+        <Column key="subject">Subject</Column>
+        <Column key="date">Date</Column>
       </TableHeader>
 
-      <TableBody items={EMAILS}>
+      <TableBody
+        items={messages}
+        loadingState={loading ? "loading" : "idle"}
+      >
         {(item) => (
-          <Row key={item.id}>
-            <Cell>{item.subject}</Cell>
-            <Cell>{item.from}</Cell>
-            <Cell>{item.date}</Cell>
+          <Row key={item.MID}>
+            <Cell>{item.From?.Addr || ""}</Cell>
+            <Cell>{item.Subject || ""}</Cell>
+            <Cell>{item.Date || ""}</Cell>
           </Row>
         )}
       </TableBody>

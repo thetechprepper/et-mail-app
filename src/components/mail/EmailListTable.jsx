@@ -14,6 +14,7 @@ import {
 const MAILBOX_ENDPOINTS = {
   inbox: "http://localhost:8080/api/mailbox/in",
   outbox: "http://localhost:8080/api/mailbox/out",
+  sent: "http://localhost:8080/api/mailbox/sent",
   archived: "http://localhost:8080/api/mailbox/archive"
 };
 
@@ -21,6 +22,8 @@ export default function EmailListTable() {
   const [mailbox, setMailbox] = useState("inbox");
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const isSent = mailbox === "sent";
 
   useEffect(() => {
     setLoading(true);
@@ -54,6 +57,7 @@ export default function EmailListTable() {
       >
         <Item key="inbox">Inbox</Item>
         <Item key="outbox">Outbox</Item>
+        <Item key="sent">Sent</Item>
         <Item key="archived">Archived</Item>
       </Picker>
 
@@ -64,7 +68,9 @@ export default function EmailListTable() {
         marginTop="size-200"
       >
         <TableHeader>
-          <Column key="from">From</Column>
+          <Column key="fromTo">
+            {isSent ? "To" : "From"}
+          </Column>
           <Column key="subject">Subject</Column>
           <Column key="date">Date</Column>
         </TableHeader>
@@ -75,7 +81,11 @@ export default function EmailListTable() {
         >
           {(item) => (
             <Row key={item.MID}>
-              <Cell>{item.From?.Addr || ""}</Cell>
+              <Cell>
+                {isSent
+                  ? item.To?.[0]?.Addr || ""
+                  : item.From?.Addr || ""}
+              </Cell>
               <Cell>{item.Subject || ""}</Cell>
               <Cell>{item.Date || ""}</Cell>
             </Row>

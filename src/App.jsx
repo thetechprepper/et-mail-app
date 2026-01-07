@@ -57,8 +57,18 @@ function App() {
   const [zoom, setZoom] = useState(DEFAULT_ZOOM_WORLD);
 
   const [useFallback, setUseFallback] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [tileBaseUrl, setTileBaseUrl] = useState(null);
+
+  const VIEW = {
+    MAIL: "mail",
+    MAP_SEARCH: "map-search",
+    WEATHER: "weather",
+    NOTES: "notes"
+  };
+
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [activeView, setActiveView] = useState(VIEW.MAIL);
+
 
   // Callsign search state
   const [searchCallsign, setSearchCallsign] = useState('');
@@ -727,63 +737,119 @@ function App() {
             </View>
           )}
 
-          {/* Sidebar toggle */}
-          {!sidebarOpen && (
-            <View backgroundColor="gray-100" padding="size-100">
-              <Flex direction="column" gap="size-200">
-		<ActionButton>
-		  <EmailOutline/>
-		</ActionButton>
-		<ActionButton>
-		  <AnnotatePen />
-		</ActionButton>
-                <ActionButton onPress={() => setSidebarOpen(true)} aria-label="Show Panel">
-                  <Magnify />
-                </ActionButton>
-		<ActionButton>
-		  <CloudOutline />
-		</ActionButton>
-		<ActionButton>
-		  <EmailRefresh />
-		</ActionButton>
-              </Flex>
-            </View>
-          )}
+          {/* Sidebar */}
+	  <View backgroundColor="gray-100" padding="size-100" width="size-800">
+            <Flex direction="column" gap="size-200">
+              <ActionButton
+                isQuiet
+                onPress={() => setActiveView(VIEW.MAIL)}
+                aria-label="Mail"
+              >
+                <EmailOutline />
+              </ActionButton>
 
-          {/* Map */}
-          <View flexGrow={1}>
-            <View backgroundColor="gray-200" borderWidth="thin" borderColor="dark" padding="size-50">
-              <Text>Your Position: 33.5123,-112.7865</Text>
-            </View>
+              <ActionButton
+                isQuiet
+                onPress={() => setActiveView(VIEW.NOTES)}
+                aria-label="Notes"
+              >
+                <AnnotatePen />
+              </ActionButton>
 
-            <Map
-              attributionPrefix="The Tech Prepper | Pigeon Maps"
-              provider={mapTiler}
-              height="100%"
-              center={center}
-              zoom={zoom}
-              minZoom={2}
-              maxZoom={11}
-              onBoundsChanged={({ center, zoom }) => {
-                setCenter(center);
-                setZoom(zoom);
-              }}
-            >
-              <ZoomControl />
-              <Marker anchor={myPosition} />
-              {searchResult && (
-                <Marker
-                  anchor={[searchResult.lat, searchResult.lon]}
-                  payload={searchResult.callsign}
-                  color="#e03e3e"
-                />
-              )}
-              {latLonMarker && <Marker anchor={latLonMarker} color="#007aff" />}
+              <ActionButton
+                isQuiet
+                onPress={() => setActiveView(VIEW.MAP_SEARCH)}
+                aria-label="Search / Map"
+              >
+                <Magnify />
+              </ActionButton>
 
-              {gridMarker && <Marker anchor={gridMarker} color="#007aff" />}
-            </Map>
+              <ActionButton
+                isQuiet
+                onPress={() => setActiveView(VIEW.WEATHER)}
+                aria-label="Weather"
+              >
+                <CloudOutline />
+              </ActionButton>
+
+              <ActionButton isQuiet aria-label="Refresh">
+                <EmailRefresh />
+              </ActionButton>
+            </Flex>
           </View>
+          {/* Sidebar End */}
+
+
+          {/* Content Container */}
+	  <View flexGrow={1} overflow="hidden">
+
+            {/* Mail Inboxes */}
+	    {activeView === VIEW.MAIL && (
+              <View padding="size-200">
+                <Heading level={3}>Inbox</Heading>
+                <EmailListTable />
+              </View>
+            )}
+            {/* Mail Inboxes End */}
+
+
+            {/* Map End */}
+	    {activeView === VIEW.MAP_SEARCH && (
+              <>
+                <View backgroundColor="gray-200" borderWidth="thin" borderColor="dark" padding="size-50">
+                  <Text>Your Position: 33.5123,-112.7865</Text>
+                </View>
+
+                <Map
+                  attributionPrefix="The Tech Prepper | Pigeon Maps"
+                  provider={mapTiler}
+                  height="100%"
+                  center={center}
+                  zoom={zoom}
+                  minZoom={2}
+                  maxZoom={11}
+                  onBoundsChanged={({ center, zoom }) => {
+                    setCenter(center);
+                    setZoom(zoom);
+                  }}
+                >
+                  <ZoomControl />
+                  <Marker anchor={myPosition} />
+                  {searchResult && (
+                    <Marker
+                      anchor={[searchResult.lat, searchResult.lon]}
+                      payload={searchResult.callsign}
+                      color="#e03e3e"
+                    />
+                  )}
+                  {latLonMarker && <Marker anchor={latLonMarker} color="#007aff" />}
+  
+                  {gridMarker && <Marker anchor={gridMarker} color="#007aff" />}
+                </Map>
+              </>
+            )}
+            {/* Map End */}
+
+	    {activeView === VIEW.WEATHER && (
+              <View padding="size-200">
+                <Heading level={3}>Weather</Heading>
+                <Text>Weather view stub</Text>
+              </View>
+            )}
+
+            {activeView === VIEW.NOTES && (
+              <View padding="size-200">
+                <Heading level={3}>Notes</Heading>
+                <Text>Notes view stub</Text>
+              </View>
+            )}
+
+          </View>
+
+          {/* Content Container End */}
+
         </Flex>
+
       </Flex>
     </Provider>
   );

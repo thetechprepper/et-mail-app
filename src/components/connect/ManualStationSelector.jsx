@@ -49,10 +49,11 @@ export default function ManualStationSelector({
     setUri(nextUri);
   }, [transport, target, bandwidth]);
 
+  const showBandwidth =
+    transport === "ardop" || transport === "varahf";
+
   return (
     <View>
-      <Text>Enter target station details.</Text>
-
       <View marginTop="size-200">
         <Flex direction="column" gap="size-200">
           <Picker
@@ -67,12 +68,14 @@ export default function ManualStationSelector({
             <Item key="varahf">varahf</Item>
           </Picker>
 
-          <TextField
-            label="Bandwidth"
-            value={bandwidth}
-            onChange={setBandwidth}
-            width="100%"
-          />
+          {showBandwidth && (
+            <TextField
+              label="Bandwidth"
+              value={bandwidth}
+              onChange={setBandwidth}
+              width="100%"
+            />
+          )}
 
           <TextField
             label="Target"

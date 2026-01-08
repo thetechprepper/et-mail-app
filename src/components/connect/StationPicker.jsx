@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Button,
   ButtonGroup,
@@ -52,6 +52,27 @@ export default function StationPicker({
     }
     close();
   };
+
+  const [didInit, setDidInit] = useState(false);
+
+  useEffect(() => {
+    if (didInit) return;
+    if (!selectedMethod) return;
+
+    setDidInit(true);
+
+    if (selectedMethod.opensDialog === false) {
+      if (typeof selectedMethod.onSelect === "function") {
+        const station = selectedMethod.onSelect();
+        if (station && onSelectStation) {
+          onSelectStation(station);
+        }
+      }
+      return;
+    }
+
+    setIsOpen(true);
+  }, [didInit, selectedMethod, onSelectStation]);
 
   return (
     <View>

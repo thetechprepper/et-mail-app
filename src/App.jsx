@@ -45,6 +45,8 @@ import { EmailListTable } from "./components/mail";
 import { NavButton } from "./components/navigation";
 import { NWSForecastZonesListTable } from "./components/weather";
 
+import { ToastContainer } from "@adobe/react-spectrum";
+
 import './App.css';
 
 function App() {
@@ -866,6 +868,7 @@ function App() {
         </Flex>
 
       </Flex>
+      <ToastContainer />
     </Provider>
   );
 }

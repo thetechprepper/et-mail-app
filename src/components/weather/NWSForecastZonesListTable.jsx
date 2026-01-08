@@ -6,8 +6,10 @@ import {
   Column,
   Row,
   Cell,
-  Button
+  Button,
+  ToastQueue
 } from "@adobe/react-spectrum";
+
 
 export default function NWSForecastZonesListTable() {
   const [zones, setZones] = useState([]);
@@ -40,6 +42,7 @@ export default function NWSForecastZonesListTable() {
     `${item.state || ""}-${item.zone || ""}-${item.county || ""}-${item.name || ""}`;
 
   const handleRequest = async (item) => {
+    const county = item?.county;
     const state = item?.state;
     const zone = item?.zone;
 
@@ -67,8 +70,18 @@ export default function NWSForecastZonesListTable() {
       if (!res.ok) {
         throw new Error(`Request failed: ${res.status}`);
       }
+
+      ToastQueue.positive(
+        `Forecast request sent for ${county}, ${state} zone ${zone}`,
+        { timeout: 5000 }
+      );
     } catch (err) {
       console.error(err);
+
+      ToastQueue.negative(
+        "Failed to post forecast request to outbox",
+        { timeout: 5000 }
+      );
     } finally {
       setRequestingKey(null);
     }
@@ -102,7 +115,7 @@ export default function NWSForecastZonesListTable() {
               <Cell>{item.zone || ""}</Cell>
               <Cell>
                 <Button
-                  variant="primary"
+                  variant="cta"
                   onPress={() => handleRequest(item)}
                   isDisabled={!item?.state || !item?.zone}
                   isPending={isRequesting}

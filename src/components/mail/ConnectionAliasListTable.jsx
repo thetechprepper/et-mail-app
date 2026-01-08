@@ -45,7 +45,7 @@ export default function ConnectionAliasListTable() {
         transport: "ardop",
 	bandwidth: "500MAX",
         target: "N0DAJ",
-	frequency: 71065300,
+	frequency: 7106530,
         uri: "ardop:///N0DAJ?bw=500MAX",
         address: ""
       },
@@ -54,7 +54,7 @@ export default function ConnectionAliasListTable() {
         transport: "varahf",
 	bandwidth: "500",
         target: "N0DAJ",
-	frequency: 71065300,
+	frequency: 7106530,
         uri: "varahf:///N0DAJ?bw=500",
         address: ""
       },
@@ -104,7 +104,7 @@ export default function ConnectionAliasListTable() {
             <Cell>{item.transport || ""}</Cell>
             <Cell>{item.bandwidth || ""}</Cell>
             <Cell>{item.target || ""}</Cell>
-            <Cell>{item.frequency || ""}</Cell>
+            <Cell>{formatFrequencyMHz(item.frequency)}</Cell>
           </Row>
         )}
       </TableBody>
@@ -112,3 +112,12 @@ export default function ConnectionAliasListTable() {
     </>
   );
 }
+
+function formatFrequencyMHz(freqHz) {
+  if (!freqHz || typeof freqHz !== "number") {
+    return "";
+  }
+
+  return `${(freqHz / 1_000_000).toFixed(5)} MHz`;
+}
+

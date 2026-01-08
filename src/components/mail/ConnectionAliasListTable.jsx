@@ -15,6 +15,7 @@ import {
 } from "@adobe/react-spectrum";
 import WorkflowRunner from "../common/WorkflowRunner";
 import StationPicker from "../connect/StationPicker";
+import AliasFavoritesSelector from "../connect/AliasFavoritesSelector";
 
 export default function ConnectionAliasListTable() {
   const aliases = useMemo(
@@ -110,9 +111,9 @@ export default function ConnectionAliasListTable() {
     },
     {
       key: "alias",
-      label: "Alias/Favorites",
+      label: "Favorites",
       render: ({ onPick }) => (
-        <Text>Alias selector goes here</Text>
+        <AliasFavoritesSelector aliases={aliases} onPick={onPick} />
       )
     },
     {
@@ -202,44 +203,6 @@ export default function ConnectionAliasListTable() {
         runSignal={runSignal}
       />
 
-      <Heading level={3}>Favorite Stations</Heading>
-
-      <TableView
-        aria-label="Connection aliases"
-        selectionMode="single"
-        selectedKeys={selectedKeys}
-        onSelectionChange={handleSelectionChange}
-        isQuiet
-        width="100%"
-      >
-        <TableHeader>
-          <Column key="name">Name</Column>
-          <Column key="transport">Transport</Column>
-          <Column key="bandwidth">Bandwidth</Column>
-          <Column key="target">Target</Column>
-          <Column key="frequency">Frequency</Column>
-        </TableHeader>
-
-        <TableBody items={aliases}>
-          {(item) => (
-            <Row key={item.uri}>
-              <Cell>{item.name || ""}</Cell>
-              <Cell>{item.transport || ""}</Cell>
-              <Cell>{item.bandwidth || ""}</Cell>
-              <Cell>{item.target || ""}</Cell>
-              <Cell>{formatFrequencyMHz(item.frequency)}</Cell>
-            </Row>
-          )}
-        </TableBody>
-      </TableView>
     </View>
   );
 }
-
-function formatFrequencyMHz(freqHz) {
-  if (!freqHz || typeof freqHz !== "number") {
-    return "";
-  }
-  return `${(freqHz / 1000000).toFixed(5)} MHz`;
-}
-

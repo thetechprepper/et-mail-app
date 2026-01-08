@@ -21,15 +21,6 @@ export default function ConnectionAliasListTable() {
   const aliases = useMemo(
     () => [
       {
-        name: "Telnet",
-        transport: "telnet",
-        bandwidth: "",
-        target: "wl2k",
-        frequency: 0,
-        uri: "telnet://KT7RUN:CMSTelnet@cms.winlink.org:8772/wl2k",
-        address: "KT7RUN:CMSTelnet@cms.winlink.org:8772"
-      },
-      {
         name: "VHF Packet 1",
         transport: "ax25",
         bandwidth: "",
@@ -144,17 +135,6 @@ export default function ConnectionAliasListTable() {
 
         return { ok: true, detail: `${num} messages received` };
       }
-    },
-    {
-      id: "refreshInbox",
-      description: "Refresh inbox list",
-      run: async () => {
-        // Example: call your inbox endpoint so UI can refresh
-        // Replace with your actual endpoint or remove if not needed.
-        const res = await fetch("http://localhost:8080/api/mailbox/in");
-        if (!res.ok) return { ok: false, detail: `HTTP ${res.status}` };
-        return { ok: true, detail: "Inbox refreshed" };
-      }
     }
   ], []);
 
@@ -185,8 +165,6 @@ export default function ConnectionAliasListTable() {
         selectedStation={selectedStation}
         onSelectStation={setSelectedStation}
       />
-
-      <Heading level={3}>Current Station</Heading>
 
       {selectedUri && (
         <View>

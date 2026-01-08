@@ -74,7 +74,7 @@ export default function StationPicker({
         </View>
       )}
 
-      <DialogTrigger isOpen={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger isOpen={isOpen} onOpenChange={setIsOpen} type="fullscreen">
         <Button isHidden aria-label="Open station picker dialog">
           Open
         </Button>
@@ -84,13 +84,7 @@ export default function StationPicker({
             <Heading>{selectedMethod ? selectedMethod.label : "Select station"}</Heading>
             <Divider />
             <Content>
-              <View
-                UNSAFE_style={{
-                  width: "90vw",
-                  height: "70vh",
-                  overflow: "auto"
-                }}
-              >
+              <View>
                 {selectedMethod && typeof selectedMethod.render === "function" ? (
                   selectedMethod.render({
                     selectedStation,

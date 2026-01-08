@@ -31,11 +31,11 @@ export default function AliasFavoritesSelector({
 
   return (
     <View>
-      <Text>Select a station alias from favorites.</Text>
+      <Text>Select a station from your favorites.</Text>
 
       <View marginTop="size-200">
         <TableView
-          aria-label="Favorite station aliases"
+          aria-label="Favorite stations"
           selectionMode="single"
           selectedKeys={selectedKeys}
           onSelectionChange={handleSelectionChange}

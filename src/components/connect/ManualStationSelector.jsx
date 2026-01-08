@@ -49,8 +49,41 @@ export default function ManualStationSelector({
     setUri(nextUri);
   }, [transport, target, bandwidth]);
 
+  useEffect(() => {
+    if (transport !== "ardop" && transport !== "varahf") {
+      setBandwidth("");
+    }
+  }, [transport]);
+
   const showBandwidth =
     transport === "ardop" || transport === "varahf";
+
+  const bandwidthOptions = useMemo(() => {
+    if (transport === "ardop") {
+      return [
+        "200MAX",
+        "500MAX",
+        "1000MAX",
+        "2000MAX",
+        "200FORCED",
+        "500FORCED",
+        "1000FORCED",
+        "2000FORCED"
+      ];
+    }
+
+    if (transport === "varahf") {
+      return ["500", "2300", "2750"];
+    }
+
+    return [];
+  }, [transport]);
+
+  useEffect(() => {
+    if (!showBandwidth) {
+      setBandwidth("");
+    }
+  }, [showBandwidth]);
 
   return (
     <View>
@@ -69,12 +102,16 @@ export default function ManualStationSelector({
           </Picker>
 
           {showBandwidth && (
-            <TextField
+            <Picker
               label="Bandwidth"
-              value={bandwidth}
-              onChange={setBandwidth}
+              selectedKey={bandwidth}
+              onSelectionChange={setBandwidth}
               width="100%"
-            />
+            >
+              {bandwidthOptions.map((bw) => (
+                <Item key={bw}>{bw}</Item>
+              ))}
+            </Picker>
           )}
 
           <TextField

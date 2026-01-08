@@ -2,6 +2,8 @@ import React, { useEffect, useMemo, useState } from "react";
 import {
   Button,
   Flex,
+  Item,
+  Picker,
   Text,
   TextField,
   View
@@ -53,12 +55,17 @@ export default function ManualStationSelector({
 
       <View marginTop="size-200">
         <Flex direction="column" gap="size-200">
-          <TextField
+          <Picker
             label="Transport"
-            value={transport}
-            onChange={setTransport}
+            selectedKey={transport}
+            onSelectionChange={setTransport}
             width="100%"
-          />
+          >
+            <Item key="ardop">ardop</Item>
+            <Item key="ax25">ax25</Item>
+            <Item key="varafm">varafm</Item>
+            <Item key="varahf">varahf</Item>
+          </Picker>
 
           <TextField
             label="Bandwidth"

@@ -92,13 +92,21 @@ export default function ConnectionAliasListTable() {
   const [selectedStation, setSelectedStation] = useState(null);
 
   // Phase A - Allow the user to select the method for selecting a station
+  // TODO: Replace KT7RUN with current et-user callsign
   const methods = [
     {
       key: "telnet",
       label: "Telnet (Requires Internet Access)",
-      render: ({ onPick }) => (
-        <Text>Telnet selector goes here</Text>
-      )
+      opensDialog: false,
+      onSelect: () => ({
+        name: "Telnet",
+        transport: "telnet",
+        bandwidth: "",
+        target: "wl2k",
+        frequency: 0,
+        uri: "telnet://KT7RUN:CMSTelnet@cms.winlink.org:8772/wl2k",
+        address: "KT7RUN:CMSTelnet@cms.winlink.org:8772"
+      })
     },
     {
       key: "alias",

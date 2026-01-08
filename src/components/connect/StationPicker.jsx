@@ -31,6 +31,18 @@ export default function StationPicker({
 
   const handleMethodChange = (key) => {
     setSelectedMethodKey(key);
+
+    const m = (methods || []).find((x) => x.key === key);
+    if (m && m.opensDialog === false) {
+      if (typeof m.onSelect === "function") {
+        const station = m.onSelect();
+        if (station && onSelectStation) {
+          onSelectStation(station);
+        }
+      }
+      return;
+    }
+
     setIsOpen(true);
   };
 

@@ -835,8 +835,7 @@ function App() {
             {/* Weather Request */}
 	    {activeView === VIEW.WEATHER && (
               <View padding="size-200">
-                <Heading level={3}>U.S. Weather Request</Heading>
-                <Text>Request weather from the U.S. National Weather Service (NWS) near your area.</Text>
+                <Text>Request weather from the U.S. National Weather Service (NWS)</Text>
 		<NWSForecastZonesListTable/>
               </View>
             )}

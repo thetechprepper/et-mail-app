@@ -16,6 +16,7 @@ import {
 import WorkflowRunner from "../common/WorkflowRunner";
 import StationPicker from "../connect/StationPicker";
 import AliasFavoritesSelector from "../connect/AliasFavoritesSelector";
+import ManualStationSelector from "../connect/ManualStationSelector";
 
 export default function ConnectionAliasListTable() {
   const aliases = useMemo(
@@ -109,13 +110,12 @@ export default function ConnectionAliasListTable() {
     },
     {
       key: "manual",
-      label: "Manual entry",
+      label: "Manual Entry",
       render: ({ onPick }) => (
-        <Text>Manual entry goes here</Text>
+        <ManualStationSelector onPick={onPick} />
       )
     }
   ];
-
 
   const [runSignal, setRunSignal] = useState(0);
 

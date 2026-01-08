@@ -855,7 +855,6 @@ function App() {
             {/* Connect */}
             {activeView === VIEW.CONNECT && (
               <View padding="size-200">
-                <Text>Connect to a Winlink Station</Text>
 	        <ConnectionAliasListTable />
               </View>
             )}

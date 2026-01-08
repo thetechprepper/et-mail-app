@@ -13,6 +13,8 @@ import {
   Text,
   View
 } from "@adobe/react-spectrum";
+import WorkflowRunner from "../common/WorkflowRunner";
+import StationPicker from "../connect/StationPicker";
 
 export default function ConnectionAliasListTable() {
   const aliases = useMemo(
@@ -87,6 +89,67 @@ export default function ConnectionAliasListTable() {
   const [selectedUri, setSelectedUri] = useState(null);
   const [isConnecting, setIsConnecting] = useState(false);
 
+  const [selectedStation, setSelectedStation] = useState(null);
+
+  // Phase A - Allow the user to select the method for selecting a station
+  const methods = [
+    {
+      key: "telnet",
+      label: "Telnet (Requires Internet Access)",
+      render: ({ onPick }) => (
+        <Text>Telnet selector goes here</Text>
+      )
+    },
+    {
+      key: "alias",
+      label: "Alias/Favorites",
+      render: ({ onPick }) => (
+        <Text>Alias selector goes here</Text>
+      )
+    },
+    {
+      key: "manual",
+      label: "Manual entry",
+      render: ({ onPick }) => (
+        <Text>Manual entry goes here</Text>
+      )
+    }
+  ];
+
+
+  const [runSignal, setRunSignal] = useState(0);
+
+  const steps = useMemo(() => [
+    {
+      id: "connect",
+      description: "Connect to station",
+      run: async ({ selectedUri }) => {
+        const encoded = encodeURIComponent(selectedUri);
+        const url = `http://localhost:8080/api/connect?url=${encoded}`;
+
+        const res = await fetch(url, { method: "GET" });
+        if (!res.ok) return { ok: false, detail: `HTTP ${res.status}` };
+
+        const data = await res.json();
+        const num = typeof data?.NumReceived === "number" ? data.NumReceived : 0;
+
+        return { ok: true, detail: `${num} messages received` };
+      }
+    },
+    {
+      id: "refreshInbox",
+      description: "Refresh inbox list",
+      run: async () => {
+        // Example: call your inbox endpoint so UI can refresh
+        // Replace with your actual endpoint or remove if not needed.
+        const res = await fetch("http://localhost:8080/api/mailbox/in");
+        if (!res.ok) return { ok: false, detail: `HTTP ${res.status}` };
+        return { ok: true, detail: "Inbox refreshed" };
+      }
+    }
+  ], []);
+
+
   const selectedKeys = selectedUri ? new Set([selectedUri]) : new Set();
 
   const selectedAlias = selectedUri
@@ -100,55 +163,20 @@ export default function ConnectionAliasListTable() {
     setSelectedUri(first || null);
   };
 
-
   const handleConnect = async () => {
     if (!selectedUri) return;
-
-    setIsConnecting(true);
-    try {
-      const encoded = encodeURIComponent(selectedUri);
-      const url = `http://localhost:8080/api/connect?url=${encoded}`;
-
-      const res = await fetch(url, { method: "GET" });
-      if (!res.ok) {
-        ToastQueue.negative(
-          `Connect failed: ${res.status}`,
-          { timeout: 5000 }
-        );
-        return;
-      }
-
-      let data = null;
-      try {
-        data = await res.json();
-      } catch (e) {
-        ToastQueue.negative(
-          "Connect failed: invalid JSON response",
-          { timeout: 5000 }
-        );
-        return;
-      }
-
-      const num = typeof data?.NumReceived === "number" ? data.NumReceived : 0;
-
-      ToastQueue.positive(
-        `Connection complete. ${num} messages received.`,
-        { timeout: 4000 }
-      );
-
-    } catch (err) {
-      console.error(err);
-      ToastQueue.negative(
-        "Connect failed",
-        { timeout: 5000 }
-      );
-    } finally {
-      setIsConnecting(false);
-    }
+    setRunSignal((n) => n + 1);
   };
 
   return (
     <View>
+
+      <StationPicker
+        methods={methods}
+        selectedStation={selectedStation}
+        onSelectStation={setSelectedStation}
+      />
+
       <Heading level={3}>Current Station</Heading>
 
       {selectedUri && (
@@ -159,6 +187,12 @@ export default function ConnectionAliasListTable() {
 
         </View>
       )}
+
+      <WorkflowRunner
+        steps={steps}
+        context={{ selectedUri }}
+        runSignal={runSignal}
+      />
 
       <Heading level={3}>Favorite Stations</Heading>
 

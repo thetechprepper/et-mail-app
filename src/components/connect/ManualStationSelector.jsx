@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Button,
   Flex,
@@ -42,19 +42,17 @@ export default function ManualStationSelector({
     });
   };
 
+  useEffect(() => {
+    const nextUri = buildUri(transport, target, bandwidth);
+    setUri(nextUri);
+  }, [transport, target, bandwidth]);
+
   return (
     <View>
-      <Text>Enter station details. URI is required.</Text>
+      <Text>Enter target station details.</Text>
 
       <View marginTop="size-200">
         <Flex direction="column" gap="size-200">
-          <TextField
-            label="Name"
-            value={name}
-            onChange={setName}
-            width="100%"
-          />
-
           <TextField
             label="Transport"
             value={transport}
@@ -85,18 +83,12 @@ export default function ManualStationSelector({
 
           <TextField
             label="URI"
+	    isReadOnly
             value={uri}
             onChange={setUri}
             width="100%"
             isRequired
             validationState={uri ? "valid" : "invalid"}
-          />
-
-          <TextField
-            label="Address"
-            value={address}
-            onChange={setAddress}
-            width="100%"
           />
 
           <Button
@@ -110,4 +102,18 @@ export default function ManualStationSelector({
       </View>
     </View>
   );
+}
+
+function buildUri(transport, target, bandwidth) {
+  if (!transport || !target) {
+    return "";
+  }
+
+  let uri = `${transport}:///${target}`;
+
+  if (bandwidth) {
+    uri += `?bw=${bandwidth}`;
+  }
+
+  return uri;
 }

@@ -8,6 +8,7 @@ import {
   TableBody,
   TableHeader,
   TableView,
+  ToastQueue,
   Row,
   Text,
   View
@@ -99,6 +100,7 @@ export default function ConnectionAliasListTable() {
     setSelectedUri(first || null);
   };
 
+
   const handleConnect = async () => {
     if (!selectedUri) return;
 
@@ -109,11 +111,37 @@ export default function ConnectionAliasListTable() {
 
       const res = await fetch(url, { method: "GET" });
       if (!res.ok) {
-        throw new Error(`Connect failed: ${res.status}`);
+        ToastQueue.negative(
+          `Connect failed: ${res.status}`,
+          { timeout: 5000 }
+        );
+        return;
       }
+
+      let data = null;
+      try {
+        data = await res.json();
+      } catch (e) {
+        ToastQueue.negative(
+          "Connect failed: invalid JSON response",
+          { timeout: 5000 }
+        );
+        return;
+      }
+
+      const num = typeof data?.NumReceived === "number" ? data.NumReceived : 0;
+
+      ToastQueue.positive(
+        `Connection complete. ${num} messages received.`,
+        { timeout: 4000 }
+      );
 
     } catch (err) {
       console.error(err);
+      ToastQueue.negative(
+        "Connect failed",
+        { timeout: 5000 }
+      );
     } finally {
       setIsConnecting(false);
     }

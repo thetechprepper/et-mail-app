@@ -41,7 +41,7 @@ import { ADSB_SERVICE, AIRCRAFT_SERVICE, CALLSIGN_SERVICE, GEO_SERVICE, GRID_SER
 import MyPosition from './MyPosition.jsx';
 import { bearing, haversineDistance, maidenhead } from './utils/distance';
 
-import { EmailListTable } from "./components/mail";
+import { ConnectionAliasListTable, EmailListTable } from "./components/mail";
 import { NavButton } from "./components/navigation";
 import { NWSForecastZonesListTable } from "./components/weather";
 
@@ -855,8 +855,8 @@ function App() {
             {/* Connect */}
             {activeView === VIEW.CONNECT && (
               <View padding="size-200">
-                <Heading level={3}>Connect to Winlink Station</Heading>
-                <Text>Connect view stub</Text>
+                <Text>Connect to a Winlink Station</Text>
+	        <ConnectionAliasListTable />
               </View>
             )}
             {/* Connect End */}

@@ -71,6 +71,21 @@ export default function EmailListTable() {
       });
   }, [mailbox]);
 
+  function markMessageRead(detailPath, mid) {
+    const url = `http://localhost:8080/api/mailbox/${detailPath}/${encodeURIComponent(
+      mid
+    )}/read`;
+
+    return fetch(url, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ read: true })
+    });
+  }
+
   useEffect(() => {
     if (!isDialogOpen || !selectedMid) return;
 
@@ -98,6 +113,29 @@ export default function EmailListTable() {
       })
       .then((data) => {
         setMessageDetail(data);
+
+        // Only trigger the "mark read" call if the list says this message is unread.
+        const wasUnread = !!messages.find((m) => m.MID === selectedMid)?.Unread;
+        if (!wasUnread) return;
+
+        // Optimistically update UI so the row stops being bold immediately.
+        setMessages((prev) =>
+          prev.map((m) => (m.MID === selectedMid ? { ...m, Unread: false } : m))
+        );
+
+        // Also update the dialog data (if present) to reflect read state.
+        setMessageDetail((prev) => (prev ? { ...prev, Unread: false } : prev));
+
+        markMessageRead(detailPath, selectedMid)
+          .then((r) => {
+            if (!r.ok) {
+              throw new Error(`Failed to mark read (${r.status})`);
+            }
+          })
+          .catch((err) => {
+            // If this fails, we just log it. (We could revert optimistic UI if you want.)
+            console.error(err);
+          });
       })
       .catch((err) => {
         if (err?.name === "AbortError") return;
@@ -109,7 +147,7 @@ export default function EmailListTable() {
       });
 
     return () => controller.abort();
-  }, [isDialogOpen, selectedMid, mailbox]);
+  }, [isDialogOpen, selectedMid, mailbox, messages]);
 
   function onAction(key) {
     setSelectedMid(String(key));

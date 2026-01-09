@@ -27,6 +27,11 @@ import {
   View,
   defaultTheme,
 } from '@adobe/react-spectrum';
+import AnnotatePen from '@spectrum-icons/workflow/AnnotatePen';
+import CloudOutline from '@spectrum-icons/workflow/CloudOutline';
+import EmailOutline from '@spectrum-icons/workflow/EmailOutline';
+import EmailRefresh from '@spectrum-icons/workflow/EmailRefresh';
+import Magnify from '@spectrum-icons/workflow/Magnify';
 import Minimize from '@spectrum-icons/workflow/Minimize';
 import Refresh from '@spectrum-icons/workflow/Refresh';
 import ShowMenu from '@spectrum-icons/workflow/ShowMenu';
@@ -35,6 +40,13 @@ import { isValidLatLon } from './utils';
 import { ADSB_SERVICE, AIRCRAFT_SERVICE, CALLSIGN_SERVICE, GEO_SERVICE, GRID_SERVICE, MAP_SERVICE, VOACAP_SERVICE } from './config';
 import MyPosition from './MyPosition.jsx';
 import { bearing, haversineDistance, maidenhead } from './utils/distance';
+
+import { ConnectionAliasListTable, EmailListTable } from "./components/mail";
+import { NavButton } from "./components/navigation";
+import { NWSForecastZonesListTable } from "./components/weather";
+
+import { ToastContainer } from "@adobe/react-spectrum";
+
 import './App.css';
 
 function App() {
@@ -49,8 +61,18 @@ function App() {
   const [zoom, setZoom] = useState(DEFAULT_ZOOM_WORLD);
 
   const [useFallback, setUseFallback] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [tileBaseUrl, setTileBaseUrl] = useState(null);
+
+  const VIEW = {
+    MAIL: "mail",
+    MAP_SEARCH: "map-search",
+    WEATHER: "weather",
+    COMPOSE: "compose",
+    CONNECT: "connect"
+  };
+
+  const [activeView, setActiveView] = useState(VIEW.MAIL);
+
 
   // Callsign search state
   const [searchCallsign, setSearchCallsign] = useState('');
@@ -78,6 +100,8 @@ function App() {
   // VOACAP input
   const [power, setPower] = useState("5"); // in watts
   const [mode, setMode] = useState("js8"); // radio mode
+
+  const [MailBoxesOpen, setMailBoxesOpen] = useState(true);
 
   // Handle zoom level based on availability of offline regional vs world map
   const getDefaultZoom = () => 
@@ -362,15 +386,12 @@ function App() {
     <Provider theme={defaultTheme}>
       <Flex direction="column" height="100vh">
         <Flex direction="row" flexGrow={1}>
+
           {/* Sidebar */}
-          {sidebarOpen && (
+          {activeView === VIEW.MAP_SEARCH && (
             <View backgroundColor="gray-100" padding="size-200" width="size-4600">
               <Flex direction="column" gap="size-200">
                 <Flex direction="row" gap="size-200" alignItems="center">
-                  <ActionButton onPress={() => setSidebarOpen(false)} aria-label="Hide Panel">
-                    <Minimize />
-                    <Text>Hide</Text>
-                  </ActionButton>
                   <MyPosition setMyPosition={setMyPosition} setCenter={setCenter} showText={true} />
 	          <ActionButton onPress={handleReset}>
 		    <Refresh />
@@ -716,53 +737,137 @@ function App() {
             </View>
           )}
 
-          {/* Sidebar toggle */}
-          {!sidebarOpen && (
-            <View backgroundColor="gray-100" padding="size-100">
-              <Flex direction="column" gap="size-200">
-                <ActionButton onPress={() => setSidebarOpen(true)} aria-label="Show Panel">
-                  <ShowMenu />
-                </ActionButton>
-                <MyPosition setMyPosition={setMyPosition} setCenter={setCenter} showText={false} />
-              </Flex>
-            </View>
-          )}
+          {/* Sidebar */}
+	  <View backgroundColor="gray-100" padding="size-100" width="size-2000">
+            <Flex direction="column" gap="size-200">
 
-          {/* Map */}
-          <View flexGrow={1}>
-            <View backgroundColor="gray-200" borderWidth="thin" borderColor="dark" padding="size-50">
-              <Text>Your Position: 33.5123,-112.7865</Text>
-            </View>
+              <NavButton
+                icon={<EmailOutline />}
+                label="Mailboxes"
+                view={VIEW.MAIL}
+                activeView={activeView}
+                setActiveView={setActiveView}
+              />
 
-            <Map
-              attributionPrefix="The Tech Prepper | Pigeon Maps"
-              provider={mapTiler}
-              height="100%"
-              center={center}
-              zoom={zoom}
-              minZoom={2}
-              maxZoom={11}
-              onBoundsChanged={({ center, zoom }) => {
-                setCenter(center);
-                setZoom(zoom);
-              }}
-            >
-              <ZoomControl />
-              <Marker anchor={myPosition} />
-              {searchResult && (
-                <Marker
-                  anchor={[searchResult.lat, searchResult.lon]}
-                  payload={searchResult.callsign}
-                  color="#e03e3e"
-                />
-              )}
-              {latLonMarker && <Marker anchor={latLonMarker} color="#007aff" />}
+              <NavButton
+                icon={<AnnotatePen/>}
+                label="Compose"
+                view={VIEW.COMPOSE}
+                activeView={activeView}
+                setActiveView={setActiveView}
+              />
 
-              {gridMarker && <Marker anchor={gridMarker} color="#007aff" />}
-            </Map>
+              <NavButton
+                icon={<Magnify/>}
+                label="Find Stations"
+                view={VIEW.MAP_SEARCH}
+                activeView={activeView}
+                setActiveView={setActiveView}
+              />
+
+              <NavButton
+                icon={<CloudOutline/>}
+                label="Weather"
+                view={VIEW.WEATHER}
+                activeView={activeView}
+                setActiveView={setActiveView}
+              />
+
+              <NavButton
+                icon={<EmailRefresh/>}
+                label="Connect"
+                view={VIEW.CONNECT}
+                activeView={activeView}
+                setActiveView={setActiveView}
+              />
+            </Flex>
           </View>
+          {/* Sidebar End */}
+
+
+          {/* Content Container overflow="hidden" */}
+	  <View flexGrow={1}>
+
+            {/* Mail Inboxes */}
+	    {activeView === VIEW.MAIL && (
+              <View padding="size-50">
+                <EmailListTable />
+              </View>
+            )}
+            {/* Mail Inboxes End */}
+
+
+            {/* Map */}
+	    {activeView === VIEW.MAP_SEARCH && (
+              <>
+                <View backgroundColor="gray-200" borderWidth="thin" borderColor="dark" padding="size-50">
+                  <Text>Your Position: DEMO</Text>
+                </View>
+
+                <Map
+                  attributionPrefix="The Tech Prepper | Pigeon Maps"
+                  provider={mapTiler}
+                  height="100%"
+                  center={center}
+                  zoom={zoom}
+                  minZoom={2}
+                  maxZoom={11}
+                  onBoundsChanged={({ center, zoom }) => {
+                    setCenter(center);
+                    setZoom(zoom);
+                  }}
+                >
+                  <ZoomControl />
+                  <Marker anchor={myPosition} />
+                  {searchResult && (
+                    <Marker
+                      anchor={[searchResult.lat, searchResult.lon]}
+                      payload={searchResult.callsign}
+                      color="#e03e3e"
+                    />
+                  )}
+                  {latLonMarker && <Marker anchor={latLonMarker} color="#007aff" />}
+  
+                  {gridMarker && <Marker anchor={gridMarker} color="#007aff" />}
+                </Map>
+              </>
+            )}
+            {/* Map End */}
+
+            {/* Weather Request */}
+	    {activeView === VIEW.WEATHER && (
+              <View padding="size-200">
+                <Text>Request weather from the U.S. National Weather Service (NWS)</Text>
+		<NWSForecastZonesListTable/>
+              </View>
+            )}
+            {/* Weather Request End */}
+
+            {/* Compose Mail */}
+            {activeView === VIEW.COMPOSE && (
+              <View padding="size-200">
+                <Heading level={3}>Compose</Heading>
+                <Text>Compose email view stub</Text>
+              </View>
+            )}
+            {/* Compose Mail End */}
+
+            {/* Connect */}
+            {activeView === VIEW.CONNECT && (
+              <View padding="size-200">
+	        <ConnectionAliasListTable />
+              </View>
+            )}
+            {/* Connect End */}
+
+          </View>
+
+          {/* Content Container End */}
+
         </Flex>
+
       </Flex>
+      <ToastContainer />
     </Provider>
   );
 }

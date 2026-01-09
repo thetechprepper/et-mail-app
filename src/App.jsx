@@ -743,7 +743,7 @@ function App() {
 
               <NavButton
                 icon={<EmailOutline />}
-                label="Mail Inboxes"
+                label="Mailboxes"
                 view={VIEW.MAIL}
                 activeView={activeView}
                 setActiveView={setActiveView}
@@ -751,7 +751,7 @@ function App() {
 
               <NavButton
                 icon={<AnnotatePen/>}
-                label="Compose Mail"
+                label="Compose"
                 view={VIEW.COMPOSE}
                 activeView={activeView}
                 setActiveView={setActiveView}
@@ -767,7 +767,7 @@ function App() {
 
               <NavButton
                 icon={<CloudOutline/>}
-                label="U.S. Weather"
+                label="Weather"
                 view={VIEW.WEATHER}
                 activeView={activeView}
                 setActiveView={setActiveView}
@@ -775,7 +775,7 @@ function App() {
 
               <NavButton
                 icon={<EmailRefresh/>}
-                label="Send/Receive"
+                label="Connect"
                 view={VIEW.CONNECT}
                 activeView={activeView}
                 setActiveView={setActiveView}
@@ -855,7 +855,6 @@ function App() {
             {/* Connect */}
             {activeView === VIEW.CONNECT && (
               <View padding="size-200">
-                <Text>Connect to a Winlink Station</Text>
 	        <ConnectionAliasListTable />
               </View>
             )}

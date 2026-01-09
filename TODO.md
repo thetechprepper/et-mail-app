@@ -1,9 +1,11 @@
 # TODO
 
+## Quick Wins
+
 * [ ] Switch to same frequency format as Pat
 * [ ] Fix logo background color (#000)
 
-## Required for public testing
+## Required for Public Testing
 
 * [ ] Replace KT7RUN hardcoded references callsign defined by et-user
 * [ ] Push favorites (aliases) into configuration
@@ -11,9 +13,12 @@
 
 ## Basic Features
 
+* [ ] Add status indictator for Pat and trasport processes
 * [ ] Mark as read / boldface undead in list view
 * [ ] Bulk Delete
 * [ ] Compose
+* [ ] Reply
+* [ ] Forward
 
 ## Advanced Features
 
@@ -23,6 +28,8 @@
   * [ ] Find "best" station based on prediction
 * Favorites
   * [ ] Add to favorite
+* Console
+  * Add console log navigation and view
 
 ## Refactoring
 

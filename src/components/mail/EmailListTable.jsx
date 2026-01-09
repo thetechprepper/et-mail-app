@@ -131,6 +131,8 @@ export default function EmailListTable() {
   const dateText = messageDetail?.Date || "";
   const bodyText = messageDetail?.Body || "";
 
+  const subjectForHeading = subjectText && subjectText.trim() ? subjectText : "[No Subject]";
+
   return (
     <View>
       <Picker
@@ -174,7 +176,20 @@ export default function EmailListTable() {
       <DialogContainer onDismiss={closeDialog}>
         {isDialogOpen && (
           <Dialog width="75vw" maxWidth="1100px">
-            <Heading>Message</Heading>
+            <Heading>
+              <span
+                style={{
+                  display: "block",
+                  maxWidth: "100%",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap"
+                }}
+                title={subjectForHeading}
+              >
+                {subjectForHeading}
+              </span>
+            </Heading>
 
             <ActionButton
               isQuiet
@@ -206,7 +221,7 @@ export default function EmailListTable() {
                     <Text>To: {toText}</Text>
                   </View>
                   <View marginBottom="size-150">
-                    <Text>Subject: {subjectText}</Text>
+                    <Text>Subject: {subjectText || "[No Subject]"}</Text>
                   </View>
                   <View marginBottom="size-150">
                     <Text>Date: {dateText}</Text>

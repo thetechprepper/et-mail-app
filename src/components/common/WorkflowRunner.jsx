@@ -1,3 +1,5 @@
+// src/components/common/WorkflowRunner.jsx
+
 import React, { useMemo, useState } from "react";
 import {
   Cell,
@@ -24,7 +26,7 @@ export default function WorkflowRunner({
   runSignal
 }) {
   const initial = useMemo(() => {
-    return steps.map((s, idx) => ({
+    return (steps || []).map((s, idx) => ({
       id: s.id || String(idx + 1),
       number: idx + 1,
       description: s.description || "",
@@ -57,7 +59,7 @@ export default function WorkflowRunner({
         }))
       );
 
-      for (let i = 0; i < steps.length; i++) {
+      for (let i = 0; i < (steps || []).length; i++) {
         if (cancelled) return;
 
         setRows((prev) =>
@@ -87,8 +89,8 @@ export default function WorkflowRunner({
             )
           );
 
-          // Stop the workflow on first failure
-          if (!ok) return;
+          // Stop the workflow on first failure unless allowFailure is true
+          if (!ok && !(steps[i] && steps[i].allowFailure)) return;
 
         } catch (err) {
           if (cancelled) return;
@@ -105,7 +107,8 @@ export default function WorkflowRunner({
                 : r
             )
           );
-          return;
+
+          if (!(steps[i] && steps[i].allowFailure)) return;
         }
       }
     };

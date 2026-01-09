@@ -16,7 +16,8 @@ import {
   Divider,
   ProgressCircle,
   Text,
-  ActionButton
+  ActionButton,
+  Flex
 } from "@adobe/react-spectrum";
 import Close from "@spectrum-icons/workflow/Close";
 
@@ -214,22 +215,38 @@ export default function EmailListTable() {
 
               {!detailLoading && !detailError && messageDetail && (
                 <View>
-                  <View marginBottom="size-150">
-                    <Text>From: {fromText}</Text>
-                  </View>
-                  <View marginBottom="size-150">
-                    <Text>To: {toText}</Text>
-                  </View>
-                  <View marginBottom="size-150">
-                    <Text>Subject: {subjectText || "[No Subject]"}</Text>
-                  </View>
-                  <View marginBottom="size-150">
-                    <Text>Date: {dateText}</Text>
+                  <View
+                    UNSAFE_style={{
+                      border: "1px solid var(--spectrum-global-color-gray-300)",
+                      borderRadius: "8px",
+                      padding: "12px"
+                    }}
+                  >
+                    <Flex direction="column" gap="size-75">
+                      <Flex gap="size-100" alignItems="baseline">
+                        <Text UNSAFE_style={{ fontWeight: 600 }}>From:</Text>
+                        <Text>{fromText}</Text>
+                      </Flex>
+
+                      <Flex gap="size-100" alignItems="baseline">
+                        <Text UNSAFE_style={{ fontWeight: 600 }}>To:</Text>
+                        <Text>{toText}</Text>
+                      </Flex>
+
+                      <Flex gap="size-100" alignItems="baseline">
+                        <Text UNSAFE_style={{ fontWeight: 600 }}>
+                          Subject:
+                        </Text>
+                        <Text>{subjectText || "[No Subject]"}</Text>
+                      </Flex>
+
+                      <Flex gap="size-100" alignItems="baseline">
+                        <Text UNSAFE_style={{ fontWeight: 600 }}>Date:</Text>
+                        <Text>{dateText}</Text>
+                      </Flex>
+                    </Flex>
                   </View>
 
-                  <Divider />
-
-                  {/* IMPORTANT: no inner scrolling here. Let the Dialog be the single scrollbar. */}
                   <View
                     marginTop="size-200"
                     UNSAFE_style={{

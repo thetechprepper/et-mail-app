@@ -2,6 +2,7 @@
 
 ## Quick Wins
 
+* [ ] Read state
 * [ ] Switch to same frequency format as Pat
 * [ ] Fix logo background color (#000)
 

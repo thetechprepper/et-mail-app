@@ -122,6 +122,10 @@ export default function ConnectionAliasListTable() {
         methods={methods}
         selectedStation={selectedStation}
         onSelectStation={setSelectedStation}
+        onSelectStation={(station) => {
+          setSelectedStation(station);
+          setWorkflowSteps([]);
+        }}
       />
 
       {selectedStation && (

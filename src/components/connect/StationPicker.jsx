@@ -76,18 +76,17 @@ export default function StationPicker({
   }, [didInit, selectedMethod, onSelectStation]);
 
   return (
-    <View width="100%">
+    <View>
       <Picker
         label={label}
         selectedKey={selectedMethodKey}
         onSelectionChange={handleMethodChange}
-	width="100%"
+        width="size-6000"
       >
         {(methods || []).map((m) => (
           <Item key={m.key}>{m.label}</Item>
         ))}
       </Picker>
-
 
       {selectedStation && (
         <View marginTop="size-200" marginBottom="size-200">

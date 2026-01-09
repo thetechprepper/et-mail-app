@@ -8,8 +8,17 @@ import {
   Cell,
   Picker,
   Item,
-  View
+  View,
+  DialogContainer,
+  Dialog,
+  Heading,
+  Content,
+  Divider,
+  ProgressCircle,
+  Text,
+  ActionButton
 } from "@adobe/react-spectrum";
+import Close from "@spectrum-icons/workflow/Close";
 
 const MAILBOX_ENDPOINTS = {
   inbox: "http://localhost:8080/api/mailbox/in",
@@ -18,12 +27,26 @@ const MAILBOX_ENDPOINTS = {
   archived: "http://localhost:8080/api/mailbox/archive"
 };
 
+const MAILBOX_DETAIL_PATH = {
+  inbox: "in",
+  outbox: "out",
+  sent: "sent",
+  archived: "archived"
+};
+
 export default function EmailListTable() {
   const [mailbox, setMailbox] = useState("inbox");
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const isSent = mailbox === "sent";
+
+  // Dialog + message detail state
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedMid, setSelectedMid] = useState(null);
+  const [messageDetail, setMessageDetail] = useState(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [detailError, setDetailError] = useState("");
 
   useEffect(() => {
     setLoading(true);
@@ -47,6 +70,67 @@ export default function EmailListTable() {
       });
   }, [mailbox]);
 
+  useEffect(() => {
+    if (!isDialogOpen || !selectedMid) return;
+
+    const controller = new AbortController();
+
+    setDetailLoading(true);
+    setDetailError("");
+    setMessageDetail(null);
+
+    const detailPath = MAILBOX_DETAIL_PATH[mailbox];
+    const url = `http://localhost:8080/api/mailbox/${detailPath}/${encodeURIComponent(
+      selectedMid
+    )}`;
+
+    fetch(url, {
+      method: "GET",
+      headers: { Accept: "application/json" },
+      signal: controller.signal
+    })
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(`Failed to fetch message (${res.status})`);
+        }
+        return res.json();
+      })
+      .then((data) => {
+        setMessageDetail(data);
+      })
+      .catch((err) => {
+        if (err?.name === "AbortError") return;
+        console.error(err);
+        setDetailError(err?.message || "Failed to fetch message");
+      })
+      .finally(() => {
+        setDetailLoading(false);
+      });
+
+    return () => controller.abort();
+  }, [isDialogOpen, selectedMid, mailbox]);
+
+  function onAction(key) {
+    setSelectedMid(String(key));
+    setIsDialogOpen(true);
+  }
+
+  function closeDialog() {
+    setIsDialogOpen(false);
+    setSelectedMid(null);
+    setMessageDetail(null);
+    setDetailError("");
+    setDetailLoading(false);
+  }
+
+  const fromText = messageDetail?.From?.Addr || "";
+  const toText = Array.isArray(messageDetail?.To)
+    ? messageDetail.To.map((x) => x?.Addr).filter(Boolean).join(", ")
+    : "";
+  const subjectText = messageDetail?.Subject || "";
+  const dateText = messageDetail?.Date || "";
+  const bodyHtml = messageDetail?.BodyHTML || "";
+
   return (
     <View>
       <Picker
@@ -63,28 +147,22 @@ export default function EmailListTable() {
 
       <TableView
         aria-label="Email list"
-        selectionMode="single"
+        selectionMode="none"
         isQuiet
         marginTop="size-200"
+        onAction={onAction}
       >
         <TableHeader>
-          <Column key="fromTo">
-            {isSent ? "To" : "From"}
-          </Column>
+          <Column key="fromTo">{isSent ? "To" : "From"}</Column>
           <Column key="subject">Subject</Column>
           <Column key="date">Date</Column>
         </TableHeader>
 
-        <TableBody
-          items={messages}
-          loadingState={loading ? "loading" : "idle"}
-        >
+        <TableBody items={messages} loadingState={loading ? "loading" : "idle"}>
           {(item) => (
             <Row key={item.MID}>
               <Cell>
-                {isSent
-                  ? item.To?.[0]?.Addr || ""
-                  : item.From?.Addr || ""}
+                {isSent ? item.To?.[0]?.Addr || "" : item.From?.Addr || ""}
               </Cell>
               <Cell>{item.Subject || ""}</Cell>
               <Cell>{item.Date || ""}</Cell>
@@ -92,6 +170,71 @@ export default function EmailListTable() {
           )}
         </TableBody>
       </TableView>
+
+      <DialogContainer onDismiss={closeDialog}>
+        {isDialogOpen && (
+          <Dialog width="75vw" maxWidth="1100px">
+            <Heading>Message</Heading>
+
+            <ActionButton
+              isQuiet
+              aria-label="Close"
+              alignSelf="end"
+              marginStart="auto"
+              onPress={closeDialog}
+            >
+              <Close />
+            </ActionButton>
+
+            <Divider />
+            <Content>
+              {detailLoading && (
+                <View>
+                  <ProgressCircle aria-label="Loading message" isIndeterminate />
+                </View>
+              )}
+
+              {!detailLoading && detailError && <Text>{detailError}</Text>}
+
+              {!detailLoading && !detailError && messageDetail && (
+                <View>
+                  <View marginBottom="size-150">
+                    <Text>From: {fromText}</Text>
+                  </View>
+                  <View marginBottom="size-150">
+                    <Text>To: {toText}</Text>
+                  </View>
+                  <View marginBottom="size-150">
+                    <Text>Subject: {subjectText}</Text>
+                  </View>
+                  <View marginBottom="size-150">
+                    <Text>Date: {dateText}</Text>
+                  </View>
+
+                  <Divider />
+
+                  <View
+                    marginTop="size-200"
+                    UNSAFE_style={{
+                      maxHeight: "55vh",
+                      overflow: "auto",
+                      padding: "12px",
+                      border: "1px solid var(--spectrum-global-color-gray-300)",
+                      borderRadius: "8px"
+                    }}
+                  >
+                    {bodyHtml ? (
+                      <div dangerouslySetInnerHTML={{ __html: bodyHtml }} />
+                    ) : (
+                      <Text>No body.</Text>
+                    )}
+                  </View>
+                </View>
+              )}
+            </Content>
+          </Dialog>
+        )}
+      </DialogContainer>
     </View>
   );
 }

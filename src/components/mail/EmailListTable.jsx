@@ -187,6 +187,7 @@ export default function EmailListTable() {
             </ActionButton>
 
             <Divider />
+
             <Content>
               {detailLoading && (
                 <View>
@@ -213,11 +214,10 @@ export default function EmailListTable() {
 
                   <Divider />
 
+                  {/* IMPORTANT: no inner scrolling here. Let the Dialog be the single scrollbar. */}
                   <View
                     marginTop="size-200"
                     UNSAFE_style={{
-                      maxHeight: "55vh",
-                      overflow: "auto",
                       padding: "12px",
                       border: "1px solid var(--spectrum-global-color-gray-300)",
                       borderRadius: "8px"

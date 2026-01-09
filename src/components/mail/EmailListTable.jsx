@@ -162,15 +162,31 @@ export default function EmailListTable() {
         </TableHeader>
 
         <TableBody items={messages} loadingState={loading ? "loading" : "idle"}>
-          {(item) => (
-            <Row key={item.MID}>
-              <Cell>
-                {isSent ? item.To?.[0]?.Addr || "" : item.From?.Addr || ""}
-              </Cell>
-              <Cell>{item.Subject || ""}</Cell>
-              <Cell>{item.Date || ""}</Cell>
-            </Row>
-          )}
+          {(item) => {
+            const isUnread = !!item.Unread;
+
+            return (
+              <Row key={item.MID}>
+                <Cell>
+                  <Text UNSAFE_style={{ fontWeight: isUnread ? 600 : 400 }}>
+                    {isSent
+                      ? item.To?.[0]?.Addr || ""
+                      : item.From?.Addr || ""}
+                  </Text>
+                </Cell>
+                <Cell>
+                  <Text UNSAFE_style={{ fontWeight: isUnread ? 600 : 400 }}>
+                    {item.Subject || ""}
+                  </Text>
+                </Cell>
+                <Cell>
+                  <Text UNSAFE_style={{ fontWeight: isUnread ? 600 : 400 }}>
+                    {item.Date || ""}
+                  </Text>
+                </Cell>
+              </Row>
+            );
+          }}
         </TableBody>
       </TableView>
 

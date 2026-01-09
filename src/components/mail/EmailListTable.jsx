@@ -31,7 +31,7 @@ const MAILBOX_DETAIL_PATH = {
   inbox: "in",
   outbox: "out",
   sent: "sent",
-  archived: "archived"
+  archived: "archive"
 };
 
 export default function EmailListTable() {

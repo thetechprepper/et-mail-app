@@ -121,7 +121,6 @@ export default function ConnectionAliasListTable() {
       <StationPicker
         methods={methods}
         selectedStation={selectedStation}
-        onSelectStation={setSelectedStation}
         onSelectStation={(station) => {
           setSelectedStation(station);
           setWorkflowSteps([]);

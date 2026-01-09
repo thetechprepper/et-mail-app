@@ -7,6 +7,7 @@ import {
   DialogTrigger,
   Divider,
   Heading,
+  InlineAlert,
   Item,
   Picker,
   Text,
@@ -14,7 +15,7 @@ import {
 } from "@adobe/react-spectrum";
 
 export default function StationPicker({
-  label = "Select station using",
+  label = "Connect to a Winlink station using:",
   methods,
   selectedStation,
   onSelectStation
@@ -75,23 +76,29 @@ export default function StationPicker({
   }, [didInit, selectedMethod, onSelectStation]);
 
   return (
-    <View>
+    <View width="100%">
       <Picker
         label={label}
         selectedKey={selectedMethodKey}
         onSelectionChange={handleMethodChange}
-        width="100%"
+	width="100%"
       >
         {(methods || []).map((m) => (
           <Item key={m.key}>{m.label}</Item>
         ))}
       </Picker>
 
+
       {selectedStation && (
-        <View marginTop="size-200">
-          <Text>
-            Selected: {selectedStation.name || ""} {selectedStation.uri ? `(${selectedStation.uri})` : ""}
-          </Text>
+        <View marginTop="size-200" marginBottom="size-200">
+          <InlineAlert variant="positive">
+            <Heading>Ready to connect</Heading>
+            <Content>
+	      <Text UNSAFE_style={{ fontFamily: "monospace" }}>
+	        {selectedStation.uri || "Uknown"}
+	      </Text>
+            </Content>
+          </InlineAlert>
         </View>
       )}
 

@@ -3,7 +3,6 @@
 ## Quick Wins
 
 * [ ] Switch to same frequency format as Pat
-* [ ] Fix logo background color (#000)
 
 ## Required for Public Testing
 

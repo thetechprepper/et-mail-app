@@ -1,6 +1,6 @@
 #!/bin/bash
 
-src="icon_512x512.png"
+src="icon_256x256.png"
 sizes=(16 24 32 48 64 128 192 256 512)
 
 for s in "${sizes[@]}"; do

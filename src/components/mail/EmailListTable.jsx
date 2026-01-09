@@ -129,7 +129,7 @@ export default function EmailListTable() {
     : "";
   const subjectText = messageDetail?.Subject || "";
   const dateText = messageDetail?.Date || "";
-  const bodyHtml = messageDetail?.BodyHTML || "";
+  const bodyText = messageDetail?.Body || "";
 
   return (
     <View>
@@ -220,14 +220,12 @@ export default function EmailListTable() {
                     UNSAFE_style={{
                       padding: "12px",
                       border: "1px solid var(--spectrum-global-color-gray-300)",
-                      borderRadius: "8px"
+                      borderRadius: "8px",
+                      whiteSpace: "pre-wrap",
+                      fontFamily: "monospace"
                     }}
                   >
-                    {bodyHtml ? (
-                      <div dangerouslySetInnerHTML={{ __html: bodyHtml }} />
-                    ) : (
-                      <Text>No body.</Text>
-                    )}
+                    {bodyText || <Text>No body.</Text>}
                   </View>
                 </View>
               )}

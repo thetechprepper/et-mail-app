@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Button,
   Cell,
@@ -52,6 +52,42 @@ export default function FindNearSelector({
 
   const selectedStationFromItems =
     selectedUri ? (items || []).find((s) => s.uri === selectedUri) : null;
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadPosition() {
+      try {
+        const res = await fetch("http://localhost:1981/api/geo/position");
+        if (!res.ok) return;
+
+        const data = await safeJson(res);
+
+        if (
+          data &&
+          data.ready === true &&
+          data.position &&
+          typeof data.position.lat === "number" &&
+          typeof data.position.lon === "number"
+        ) {
+          if (!cancelled) {
+            setNear({
+              lat: String(data.position.lat),
+              lon: String(data.position.lon)
+            });
+          }
+        }
+      } catch (e) {
+        // silently ignore; user can still enter manually
+      }
+    }
+
+    loadPosition();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const handleSearch = async () => {
     const lat = String(near.lat || "").trim();
@@ -118,7 +154,11 @@ export default function FindNearSelector({
             width="size-2000"
           />
 
-          <Button variant="primary" onPress={handleSearch} isDisabled={isSearching}>
+          <Button
+            variant="primary"
+            onPress={handleSearch}
+            isDisabled={isSearching}
+          >
             {isSearching ? "Searching..." : "Search"}
           </Button>
         </Flex>
@@ -165,7 +205,9 @@ export default function FindNearSelector({
         <Flex direction="row" gap="size-200" alignItems="center">
           <Button
             variant="cta"
-            onPress={() => selectedStationFromItems && onPick(selectedStationFromItems)}
+            onPress={() =>
+              selectedStationFromItems && onPick(selectedStationFromItems)
+            }
             isDisabled={!selectedStationFromItems}
           >
             Use selected
@@ -249,7 +291,6 @@ function buildStationUri({
   const t = transport || "";
   const c = callsign || "";
   const bw = bandwidth || "";
-  const mc = typeof modeCode === "number" ? modeCode : 0;
   const f = typeof freq === "number" ? freq : 0;
 
   if (!t || !c) return "";

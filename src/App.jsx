@@ -41,7 +41,7 @@ import { ADSB_SERVICE, AIRCRAFT_SERVICE, CALLSIGN_SERVICE, GEO_SERVICE, GRID_SER
 import MyPosition from './MyPosition.jsx';
 import { bearing, haversineDistance, maidenhead } from './utils/distance';
 
-import { ConnectionAliasListTable, EmailListTable } from "./components/mail";
+import { ConnectionView, EmailListTable } from "./components/mail";
 import { NavButton } from "./components/navigation";
 import { NWSForecastZonesListTable } from "./components/weather";
 
@@ -855,7 +855,7 @@ function App() {
             {/* Connect */}
             {activeView === VIEW.CONNECT && (
               <View padding="size-200">
-	        <ConnectionAliasListTable />
+	        <ConnectionView />
               </View>
             )}
             {/* Connect End */}

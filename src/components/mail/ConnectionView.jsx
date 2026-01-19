@@ -9,7 +9,7 @@ import StationPicker from "../connect/StationPicker";
 import AliasFavoritesSelector from "../connect/AliasFavoritesSelector";
 import ManualStationSelector from "../connect/ManualStationSelector";
 
-export default function ConnectionAliasListTable() {
+export default function ConnectionView() {
   const aliases = useMemo(
     () => [
       {

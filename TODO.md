@@ -3,6 +3,8 @@
 ## Quick Wins
 
 * [ ] Switch to same frequency format as Pat
+* [ ] Add support for saildocs - SWPC
+* [ ] Add support for https://data.offgridwx.com
 
 ## Required for Public Testing
 
@@ -31,5 +33,3 @@
   * Add console log navigation and view
 
 ## Refactoring
-
-* [ ] Rename ConnectionAliasListTable to ConnectionView

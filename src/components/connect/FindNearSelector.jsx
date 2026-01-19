@@ -38,7 +38,8 @@ export default function FindNearSelector({
     () => ({
       lat: "",
       lon: "",
-      gridSquare: ""
+      gridSquare: "",
+      callsign: ""
     }),
     []
   );
@@ -212,6 +213,79 @@ export default function FindNearSelector({
     }
   };
 
+  const handleSearchByCallsign = async () => {
+    const callsign = String(near.callsign || "").trim().toLowerCase();
+
+    if (!callsign) {
+      setError("Callsign is required.");
+      return;
+    }
+
+    setIsSearching(true);
+    setError("");
+
+    try {
+      const url =
+        `http://localhost:1981/api/license?callsign=${encodeURIComponent(callsign)}`;
+
+      const res = await fetch(url, { method: "GET" });
+      if (!res.ok) {
+        throw new Error(`Callsign lookup failed: ${res.status}`);
+      }
+
+      const data = await safeJson(res);
+
+      if (
+        !data ||
+        typeof data.lat !== "number" ||
+        typeof data.lon !== "number"
+      ) {
+        setError("Unexpected response from server.");
+        return;
+      }
+
+      const lat = String(data.lat);
+      const lon = String(data.lon);
+
+      setNear((prev) => ({
+        ...prev,
+        lat,
+        lon,
+        gridSquare: data.grid ? String(data.grid) : prev.gridSquare
+      }));
+
+      const url2 =
+        `http://localhost:1981/api/winlink/near?lat=${encodeURIComponent(lat)}` +
+        `&lon=${encodeURIComponent(lon)}`;
+
+      const res2 = await fetch(url2, { method: "GET" });
+      if (!res2.ok) {
+        throw new Error(`Search failed: ${res2.status}`);
+      }
+
+      const data2 = await safeJson(res2);
+
+      if (!Array.isArray(data2)) {
+        setApiResults([]);
+        setError("Unexpected response from server.");
+        return;
+      }
+
+      const mapped = data2.map(mapNearResultToStation);
+      setApiResults(mapped);
+
+      if (mapped.length === 0) {
+        setSelectedUri(null);
+      }
+    } catch (err) {
+      setApiResults([]);
+      setSelectedUri(null);
+      setError(err && err.message ? err.message : "Search failed");
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
   return (
     <View>
       <Text>Select a station near a latitude and longitude.</Text>
@@ -263,6 +337,26 @@ export default function FindNearSelector({
           </Flex>
         </View>
 
+        <View marginTop="size-200">
+          <Flex direction="row" gap="size-200" alignItems="end">
+            <TextField
+              label="Callsign"
+              value={String(near.callsign)}
+              onChange={(v) => setNear((prev) => ({ ...prev, callsign: v }))}
+              width="size-2000"
+              placeholder="KT7RUN"
+            />
+
+            <Button
+              variant="primary"
+              onPress={handleSearchByCallsign}
+              isDisabled={isSearching}
+            >
+              {isSearching ? "Searching..." : "Search by callsign"}
+            </Button>
+          </Flex>
+        </View>
+
         {error && (
           <View marginTop="size-150">
             <Text>{error}</Text>
@@ -287,7 +381,7 @@ export default function FindNearSelector({
             <Column key="frequency">Frequency</Column>
           </TableHeader>
 
-        <TableBody items={items || []}>
+          <TableBody items={items || []}>
             {(item) => (
               <Row key={item.uri}>
                 <Cell>{item.name || ""}</Cell>

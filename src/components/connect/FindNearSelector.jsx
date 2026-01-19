@@ -37,7 +37,8 @@ export default function FindNearSelector({
   const defaultNear = useMemo(
     () => ({
       lat: "",
-      lon: ""
+      lon: "",
+      gridSquare: ""
     }),
     []
   );
@@ -71,10 +72,14 @@ export default function FindNearSelector({
           typeof data.position.lon === "number"
         ) {
           if (!cancelled) {
-            setNear({
+            setNear((prev) => ({
+              ...prev,
               lat: String(data.position.lat),
-              lon: String(data.position.lon)
-            });
+              lon: String(data.position.lon),
+              gridSquare: data.position.gridSquare
+                ? String(data.position.gridSquare)
+                : prev.gridSquare
+            }));
           }
         }
       } catch (e) {
@@ -134,6 +139,79 @@ export default function FindNearSelector({
     }
   };
 
+  const handleSearchByGrid = async () => {
+    const grid = String(near.gridSquare || "").trim().toLowerCase();
+
+    if (!(grid.length === 4 || grid.length === 6)) {
+      setError("Grid square must be 4 or 6 characters.");
+      return;
+    }
+
+    setIsSearching(true);
+    setError("");
+
+    try {
+      const url =
+        `http://localhost:1981/api/geo/grid?gridSquare=${encodeURIComponent(grid)}`;
+
+      const res = await fetch(url, { method: "GET" });
+      if (!res.ok) {
+        throw new Error(`Grid lookup failed: ${res.status}`);
+      }
+
+      const data = await safeJson(res);
+
+      if (
+        !data ||
+        !data.position ||
+        typeof data.position.lat !== "number" ||
+        typeof data.position.lon !== "number"
+      ) {
+        setError("Unexpected response from server.");
+        return;
+      }
+
+      const lat = String(data.position.lat);
+      const lon = String(data.position.lon);
+
+      setNear((prev) => ({
+        ...prev,
+        lat,
+        lon
+      }));
+
+      const url2 =
+        `http://localhost:1981/api/winlink/near?lat=${encodeURIComponent(lat)}` +
+        `&lon=${encodeURIComponent(lon)}`;
+
+      const res2 = await fetch(url2, { method: "GET" });
+      if (!res2.ok) {
+        throw new Error(`Search failed: ${res2.status}`);
+      }
+
+      const data2 = await safeJson(res2);
+
+      if (!Array.isArray(data2)) {
+        setApiResults([]);
+        setError("Unexpected response from server.");
+        return;
+      }
+
+      const mapped = data2.map(mapNearResultToStation);
+      setApiResults(mapped);
+
+      if (mapped.length === 0) {
+        setSelectedUri(null);
+      }
+    } catch (err) {
+      setApiResults([]);
+      setSelectedUri(null);
+      setError(err && err.message ? err.message : "Search failed");
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
   return (
     <View>
       <Text>Select a station near a latitude and longitude.</Text>
@@ -163,6 +241,28 @@ export default function FindNearSelector({
           </Button>
         </Flex>
 
+        <View marginTop="size-200">
+          <Flex direction="row" gap="size-200" alignItems="end">
+            <TextField
+              label="Grid square"
+              value={String(near.gridSquare)}
+              onChange={(v) =>
+                setNear((prev) => ({ ...prev, gridSquare: v }))
+              }
+              width="size-2000"
+              placeholder="DM33 or DM33xv"
+            />
+
+            <Button
+              variant="primary"
+              onPress={handleSearchByGrid}
+              isDisabled={isSearching}
+            >
+              {isSearching ? "Searching..." : "Search by grid"}
+            </Button>
+          </Flex>
+        </View>
+
         {error && (
           <View marginTop="size-150">
             <Text>{error}</Text>
@@ -187,7 +287,7 @@ export default function FindNearSelector({
             <Column key="frequency">Frequency</Column>
           </TableHeader>
 
-          <TableBody items={items || []}>
+        <TableBody items={items || []}>
             {(item) => (
               <Row key={item.uri}>
                 <Cell>{item.name || ""}</Cell>
@@ -291,6 +391,7 @@ function buildStationUri({
   const t = transport || "";
   const c = callsign || "";
   const bw = bandwidth || "";
+  const mc = typeof modeCode === "number" ? modeCode : 0;
   const f = typeof freq === "number" ? freq : 0;
 
   if (!t || !c) return "";

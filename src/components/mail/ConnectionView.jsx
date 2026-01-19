@@ -7,6 +7,7 @@ import {
 import WorkflowRunner from "../common/WorkflowRunner";
 import StationPicker from "../connect/StationPicker";
 import AliasFavoritesSelector from "../connect/AliasFavoritesSelector";
+import FindNearSelector from "../connect/FindNearSelector";
 import ManualStationSelector from "../connect/ManualStationSelector";
 
 export default function ConnectionView() {
@@ -104,6 +105,13 @@ export default function ConnectionView() {
       label: "Manual Entry",
       render: ({ onPick }) => (
         <ManualStationSelector onPick={onPick} />
+      )
+    },
+    {
+      key: "near",
+      label: "Find Near",
+      render: ({ onPick }) => (
+        <FindNearSelector onPick={onPick} />
       )
     }
   ];

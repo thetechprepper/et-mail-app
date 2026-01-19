@@ -4,13 +4,12 @@ import {
   Cell,
   Column,
   Flex,
-  Item,
-  Picker,
   TableBody,
   TableHeader,
   TableView,
   Row,
   Text,
+  TextField,
   View
 } from "@adobe/react-spectrum";
 
@@ -37,9 +36,6 @@ export default function FindNearSelector({
 
   const defaultNear = useMemo(
     () => ({
-      mode: "gps",          // gps | grid | manual
-      radiusMiles: 25,
-      grid: "",
       lat: "",
       lon: ""
     }),
@@ -48,28 +44,90 @@ export default function FindNearSelector({
 
   const [near, setNear] = useState(defaultNear);
 
+  const [apiResults, setApiResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [error, setError] = useState("");
+
+  const items = (results && results.length ? results : apiResults) || [];
+
+  const selectedStationFromItems =
+    selectedUri ? (items || []).find((s) => s.uri === selectedUri) : null;
+
+  const handleSearch = async () => {
+    const lat = String(near.lat || "").trim();
+    const lon = String(near.lon || "").trim();
+
+    if (!lat || !lon) {
+      setError("Latitude and longitude are required.");
+      return;
+    }
+
+    setIsSearching(true);
+    setError("");
+
+    try {
+      const url =
+        `http://localhost:1981/api/winlink/near?lat=${encodeURIComponent(lat)}` +
+        `&lon=${encodeURIComponent(lon)}`;
+
+      const res = await fetch(url, { method: "GET" });
+      if (!res.ok) {
+        throw new Error(`Search failed: ${res.status}`);
+      }
+
+      const data = await safeJson(res);
+
+      if (!Array.isArray(data)) {
+        setApiResults([]);
+        setError("Unexpected response from server.");
+        return;
+      }
+
+      const mapped = data.map(mapNearResultToStation);
+      setApiResults(mapped);
+
+      if (mapped.length === 0) {
+        setSelectedUri(null);
+      }
+    } catch (err) {
+      setApiResults([]);
+      setSelectedUri(null);
+      setError(err && err.message ? err.message : "Search failed");
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
   return (
     <View>
-      <Text>Select a station near you (stub).</Text>
+      <Text>Select a station near a latitude and longitude.</Text>
 
       <View marginTop="size-200">
-        <Picker
-          label="Find near"
-          selectedKey={near.mode}
-          onSelectionChange={(key) =>
-            setNear((prev) => ({ ...prev, mode: String(key) }))
-          }
-        >
-          <Item key="gps">Current GPS Position</Item>
-          <Item key="grid">My Grid Square</Item>
-          <Item key="manual">Manual Lat/Lon</Item>
-        </Picker>
-      </View>
+        <Flex direction="row" gap="size-200" alignItems="end">
+          <TextField
+            label="Latitude"
+            value={String(near.lat)}
+            onChange={(v) => setNear((prev) => ({ ...prev, lat: v }))}
+            width="size-2000"
+          />
 
-      <View marginTop="size-200">
-        <Text>
-          Mode: {near.mode}, Radius: {String(near.radiusMiles)} miles
-        </Text>
+          <TextField
+            label="Longitude"
+            value={String(near.lon)}
+            onChange={(v) => setNear((prev) => ({ ...prev, lon: v }))}
+            width="size-2000"
+          />
+
+          <Button variant="primary" onPress={handleSearch} isDisabled={isSearching}>
+            {isSearching ? "Searching..." : "Search"}
+          </Button>
+        </Flex>
+
+        {error && (
+          <View marginTop="size-150">
+            <Text>{error}</Text>
+          </View>
+        )}
       </View>
 
       <View marginTop="size-200">
@@ -89,7 +147,7 @@ export default function FindNearSelector({
             <Column key="frequency">Frequency</Column>
           </TableHeader>
 
-          <TableBody items={results || []}>
+          <TableBody items={items || []}>
             {(item) => (
               <Row key={item.uri}>
                 <Cell>{item.name || ""}</Cell>
@@ -107,14 +165,14 @@ export default function FindNearSelector({
         <Flex direction="row" gap="size-200" alignItems="center">
           <Button
             variant="cta"
-            onPress={() => selectedStation && onPick(selectedStation)}
-            isDisabled={!selectedStation}
+            onPress={() => selectedStationFromItems && onPick(selectedStationFromItems)}
+            isDisabled={!selectedStationFromItems}
           >
             Use selected
           </Button>
 
-          {selectedStation && (
-            <Text>Current selection: {selectedStation.uri}</Text>
+          {selectedStationFromItems && (
+            <Text>Current selection: {selectedStationFromItems.uri}</Text>
           )}
         </Flex>
       </View>
@@ -122,9 +180,98 @@ export default function FindNearSelector({
   );
 }
 
+function mapNearResultToStation(r) {
+  const callsign = r && r.callsign ? String(r.callsign) : "";
+  const mode = r && r.mode ? String(r.mode) : "";
+  const modeCode = r && typeof r.modeCode === "number" ? r.modeCode : 0;
+  const freq = r && typeof r.freq === "number" ? r.freq : 0;
+  const band = r && r.band ? String(r.band) : "";
+
+  const transport = mapModeToTransport(mode);
+  const bandwidth = mapModeToBandwidth(mode);
+
+  const uri = buildStationUri({
+    transport,
+    callsign,
+    bandwidth,
+    modeCode,
+    freq
+  });
+
+  return {
+    name: [callsign, mode, band].filter(Boolean).join(" - "),
+    transport,
+    bandwidth,
+    target: callsign,
+    frequency: freq,
+    uri,
+    address: ""
+  };
+}
+
+function mapModeToTransport(mode) {
+  const m = (mode || "").toLowerCase();
+
+  if (m.includes("vara fm")) return "varafm";
+  if (m.includes("packet")) return "ax25";
+  if (m.includes("ardop")) return "ardop";
+  if (m.includes("vara")) return "varahf";
+
+  return "";
+}
+
+function mapModeToBandwidth(mode) {
+  const m = (mode || "").toUpperCase();
+
+  // Examples: "ARDOP 2000", "ARDOP 500", "VARA 2750", "VARA 500", "VARA FM WIDE"
+  if (m.startsWith("ARDOP ")) {
+    return m.replace("ARDOP ", "").trim();
+  }
+
+  if (m.startsWith("VARA FM")) {
+    return "";
+  }
+
+  if (m.startsWith("VARA ")) {
+    return m.replace("VARA ", "").trim();
+  }
+
+  return "";
+}
+
+function buildStationUri({
+  transport,
+  callsign,
+  bandwidth,
+  modeCode,
+  freq
+}) {
+  const t = transport || "";
+  const c = callsign || "";
+  const bw = bandwidth || "";
+  const mc = typeof modeCode === "number" ? modeCode : 0;
+  const f = typeof freq === "number" ? freq : 0;
+
+  if (!t || !c) return "";
+
+  if (bw) {
+    return `${t}:///${c}?bw=${encodeURIComponent(bw)}&f=${f}`;
+  }
+
+  return `${t}:///${c}?f=${f}`;
+}
+
 function formatFrequencyMHz(freqHz) {
   if (!freqHz || typeof freqHz !== "number") {
     return "";
   }
   return `${(freqHz / 1000000).toFixed(5)} MHz`;
+}
+
+async function safeJson(res) {
+  try {
+    return await res.json();
+  } catch (e) {
+    return {};
+  }
 }

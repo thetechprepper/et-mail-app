@@ -4,6 +4,8 @@ import {
   Cell,
   Column,
   Flex,
+  Item,
+  Picker,
   TableBody,
   TableHeader,
   TableView,
@@ -39,7 +41,9 @@ export default function FindNearSelector({
       lat: "",
       lon: "",
       gridSquare: "",
-      callsign: ""
+      callsign: "",
+      modeFilter: "",
+      bandFilter: ""
     }),
     []
   );
@@ -108,9 +112,7 @@ export default function FindNearSelector({
     setError("");
 
     try {
-      const url =
-        `http://localhost:1981/api/winlink/near?lat=${encodeURIComponent(lat)}` +
-        `&lon=${encodeURIComponent(lon)}`;
+      const url = buildNearUrl(lat, lon, near);
 
       const res = await fetch(url, { method: "GET" });
       if (!res.ok) {
@@ -181,9 +183,7 @@ export default function FindNearSelector({
         lon
       }));
 
-      const url2 =
-        `http://localhost:1981/api/winlink/near?lat=${encodeURIComponent(lat)}` +
-        `&lon=${encodeURIComponent(lon)}`;
+      const url2 = buildNearUrl(lat, lon, near);
 
       const res2 = await fetch(url2, { method: "GET" });
       if (!res2.ok) {
@@ -254,9 +254,7 @@ export default function FindNearSelector({
         gridSquare: data.grid ? String(data.grid) : prev.gridSquare
       }));
 
-      const url2 =
-        `http://localhost:1981/api/winlink/near?lat=${encodeURIComponent(lat)}` +
-        `&lon=${encodeURIComponent(lon)}`;
+      const url2 = buildNearUrl(lat, lon, near);
 
       const res2 = await fetch(url2, { method: "GET" });
       if (!res2.ok) {
@@ -305,6 +303,49 @@ export default function FindNearSelector({
             onChange={(v) => setNear((prev) => ({ ...prev, lon: v }))}
             width="size-2000"
           />
+
+          <Picker
+            label="Mode"
+            selectedKey={near.modeFilter || "all"}
+            onSelectionChange={(key) =>
+              setNear((prev) => ({
+                ...prev,
+                modeFilter: String(key) === "all" ? "" : String(key)
+              }))
+            }
+            width="size-2000"
+          >
+            <Item key="all">All</Item>
+            <Item key="ardop">ardop</Item>
+            <Item key="vara">vara</Item>
+            <Item key="packet">packet</Item>
+          </Picker>
+
+          <Picker
+            label="Band"
+            selectedKey={near.bandFilter || "all"}
+            onSelectionChange={(key) =>
+              setNear((prev) => ({
+                ...prev,
+                bandFilter: String(key) === "all" ? "" : String(key)
+              }))
+            }
+            width="size-2000"
+          >
+            <Item key="all">All</Item>
+            <Item key="70cm">70cm</Item>
+            <Item key="2m">2m</Item>
+            <Item key="6m">6m</Item>
+            <Item key="10m">10m</Item>
+            <Item key="12m">12m</Item>
+            <Item key="15m">15m</Item>
+            <Item key="17m">17m</Item>
+            <Item key="20m">20m</Item>
+            <Item key="30m">30m</Item>
+            <Item key="40m">40m</Item>
+            <Item key="80m">80m</Item>
+            <Item key="160m">160m</Item>
+          </Picker>
 
           <Button
             variant="primary"
@@ -414,6 +455,25 @@ export default function FindNearSelector({
       </View>
     </View>
   );
+}
+
+function buildNearUrl(lat, lon, near) {
+  let url =
+    `http://localhost:1981/api/winlink/near?lat=${encodeURIComponent(lat)}` +
+    `&lon=${encodeURIComponent(lon)}`;
+
+  const mode = near && near.modeFilter ? String(near.modeFilter).trim() : "";
+  const band = near && near.bandFilter ? String(near.bandFilter).trim() : "";
+
+  if (mode) {
+    url += `&mode=${encodeURIComponent(mode)}`;
+  }
+
+  if (band) {
+    url += `&band=${encodeURIComponent(band)}`;
+  }
+
+  return url;
 }
 
 function mapNearResultToStation(r) {

@@ -144,6 +144,14 @@ export default function FindNearSelector({
         const uri = item && item.uri ? String(item.uri) : "";
         if (!uri) continue;
 
+        // Only execute predictions for varahf or ardop rows
+        const transport = item && item.transport ? String(item.transport).toLowerCase() : "";
+        if (transport !== "varahf" && transport !== "ardop") {
+          next[uri] = "";
+          setReliabilityByUri({ ...next });
+          continue;
+        }
+
         const rxLatRaw =
           item && item.lat !== undefined
             ? item.lat

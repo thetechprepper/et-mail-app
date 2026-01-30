@@ -152,6 +152,27 @@ export default function FindNearSelector({
           continue;
         }
 
+        // Derive VOACAP mode from row transport + bandwidth
+        const bw =
+          item && item.bandwidth !== undefined && item.bandwidth !== null
+            ? String(item.bandwidth).trim()
+            : "";
+
+        let voacapMode = "";
+        if (transport === "ardop") {
+          voacapMode = "ardop";
+        } else if (transport === "varahf") {
+          if (bw === "500") voacapMode = "vara-500";
+          else if (bw === "2750") voacapMode = "vara-2750";
+          else voacapMode = "vara-2300";
+        }
+
+        if (!voacapMode) {
+          next[uri] = "";
+          setReliabilityByUri({ ...next });
+          continue;
+        }
+
         const rxLatRaw =
           item && item.lat !== undefined
             ? item.lat
@@ -185,7 +206,7 @@ export default function FindNearSelector({
           txLatLon,
           rxLatLon,
           power,
-          mode: "vara-2300",
+          mode: voacapMode,
           frequency
         });
 

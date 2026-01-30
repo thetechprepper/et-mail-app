@@ -60,6 +60,21 @@ export default function FindNearSelector({
 
   const [reliabilityByUri, setReliabilityByUri] = useState({});
 
+  // IMPORTANT: materialize reliability onto items so TableView re-renders cells
+  const itemsWithReliability = useMemo(() => {
+    if (!Array.isArray(items)) return [];
+    return items.map((it) => {
+      const uri = it && it.uri ? String(it.uri) : "";
+      const reliability = uri && reliabilityByUri
+        ? (reliabilityByUri[uri] || "")
+        : "";
+      return {
+        ...it,
+        reliability
+      };
+    });
+  }, [items, reliabilityByUri]);
+
   const selectedStationFromItems =
     selectedUri ? (items || []).find((s) => s.uri === selectedUri) : null;
 
@@ -135,9 +150,13 @@ export default function FindNearSelector({
             : (item && item.longitude !== undefined ? item.longitude : "");
 
         const rxLat =
-          typeof rxLatRaw === "number" ? rxLatRaw : parseFloat(String(rxLatRaw).trim());
+          typeof rxLatRaw === "number"
+            ? rxLatRaw
+            : parseFloat(String(rxLatRaw).trim());
         const rxLon =
-          typeof rxLonRaw === "number" ? rxLonRaw : parseFloat(String(rxLonRaw).trim());
+          typeof rxLonRaw === "number"
+            ? rxLonRaw
+            : parseFloat(String(rxLonRaw).trim());
 
         if (!Number.isFinite(rxLat) || !Number.isFinite(rxLon)) {
           next[uri] = "";
@@ -498,7 +517,7 @@ export default function FindNearSelector({
             <Column key="reliability">Reliability</Column>
           </TableHeader>
 
-          <TableBody items={items || []}>
+          <TableBody items={itemsWithReliability || []}>
             {(item) => (
               <Row key={item.uri}>
                 <Cell>{item.name || ""}</Cell>
@@ -506,7 +525,7 @@ export default function FindNearSelector({
                 <Cell>{item.bandwidth || ""}</Cell>
                 <Cell>{item.target || ""}</Cell>
                 <Cell>{formatFrequencyMHz(item.frequency)}</Cell>
-                <Cell>{(item && item.uri && reliabilityByUri[item.uri]) || ""}</Cell>
+                <Cell>{item.reliability || ""}</Cell>
               </Row>
             )}
           </TableBody>

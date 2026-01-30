@@ -43,7 +43,8 @@ export default function FindNearSelector({
       gridSquare: "",
       callsign: "",
       modeFilter: "",
-      bandFilter: ""
+      bandFilter: "",
+      power: "5"
     }),
     []
   );
@@ -376,53 +377,71 @@ export default function FindNearSelector({
 
   return (
     <View>
-      <Text>Select a station near a latitude and longitude.</Text>
-
         <View marginTop="size-200">
           <Flex direction="row" gap="size-200" alignItems="end">
-          <Picker
-            label="Mode"
-            selectedKey={near.modeFilter || "all"}
-            onSelectionChange={(key) =>
-              setNear((prev) => ({
-                ...prev,
-                modeFilter: String(key) === "all" ? "" : String(key)
-              }))
-            }
-            width="size-2000"
-          >
-            <Item key="all">All</Item>
-            <Item key="ardop">ardop</Item>
-            <Item key="vara">vara</Item>
-            <Item key="packet">packet</Item>
-          </Picker>
+            <Picker
+              label="Mode"
+              selectedKey={near.modeFilter || "all"}
+              onSelectionChange={(key) =>
+                setNear((prev) => ({
+                  ...prev,
+                  modeFilter: String(key) === "all" ? "" : String(key)
+                }))
+              }
+              width="size-2000"
+            >
+              <Item key="all">All</Item>
+              <Item key="ardop">ardop</Item>
+              <Item key="vara">vara</Item>
+              <Item key="packet">packet</Item>
+            </Picker>
 
-          <Picker
-            label="Band"
-            selectedKey={near.bandFilter || "all"}
-            onSelectionChange={(key) =>
-              setNear((prev) => ({
-                ...prev,
-                bandFilter: String(key) === "all" ? "" : String(key)
-              }))
-            }
-            width="size-2000"
-          >
-            <Item key="all">All</Item>
-            <Item key="70cm">70cm</Item>
-            <Item key="2m">2m</Item>
-            <Item key="6m">6m</Item>
-            <Item key="10m">10m</Item>
-            <Item key="12m">12m</Item>
-            <Item key="15m">15m</Item>
-            <Item key="17m">17m</Item>
-            <Item key="20m">20m</Item>
-            <Item key="30m">30m</Item>
-            <Item key="40m">40m</Item>
-            <Item key="80m">80m</Item>
-            <Item key="160m">160m</Item>
-          </Picker>
-	  </Flex>
+            <Picker
+              label="Band"
+              selectedKey={near.bandFilter || "all"}
+              onSelectionChange={(key) =>
+                setNear((prev) => ({
+                  ...prev,
+                  bandFilter: String(key) === "all" ? "" : String(key)
+                }))
+              }
+              width="size-2000"
+            >
+              <Item key="all">All</Item>
+              <Item key="70cm">70cm</Item>
+              <Item key="2m">2m</Item>
+              <Item key="6m">6m</Item>
+              <Item key="10m">10m</Item>
+              <Item key="12m">12m</Item>
+              <Item key="15m">15m</Item>
+              <Item key="17m">17m</Item>
+              <Item key="20m">20m</Item>
+              <Item key="30m">30m</Item>
+              <Item key="40m">40m</Item>
+              <Item key="80m">80m</Item>
+              <Item key="160m">160m</Item>
+            </Picker>
+
+            <Picker
+              label="Power"
+              selectedKey={near.power || "5"}
+              onSelectionChange={(key) =>
+                setNear((prev) => ({
+                  ...prev,
+                  power: String(key)
+                }))
+              }
+              width="size-2000"
+            >
+              <Item key="5">5</Item>
+              <Item key="10">10</Item>
+              <Item key="20">20</Item>
+              <Item key="50">50</Item>
+              <Item key="100">100</Item>
+              <Item key="500">500</Item>
+              <Item key="1500">1500</Item>
+            </Picker>
+          </Flex>
         </View>
 
       <View marginTop="size-200">

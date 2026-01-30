@@ -133,6 +133,9 @@ export default function FindNearSelector({
 
       const txLatLon = `${latStr},${lonStr}`;
 
+      const parsedPower = parseInt(String(near.power || "5"), 10);
+      const power = Number.isFinite(parsedPower) ? parsedPower : 5;
+
       const next = {};
 
       for (const item of items) {
@@ -173,7 +176,7 @@ export default function FindNearSelector({
         const rel = await getPredictionForNow({
           txLatLon,
           rxLatLon,
-          power: 5,
+          power,
           mode: "vara-2300",
           frequency
         });
@@ -188,7 +191,7 @@ export default function FindNearSelector({
     return () => {
       cancelled = true;
     };
-  }, [items, near.lat, near.lon]);
+  }, [items, near.lat, near.lon, near.power]);
 
   const handleSearch = async () => {
     const lat = String(near.lat || "").trim();

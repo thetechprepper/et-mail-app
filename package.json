@@ -2,7 +2,7 @@
   "name": "et-mail-app",
   "description": "A front-end application for Pat Winlink",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.1",
     "author": {
     "name": "Gaston Gonzalez",
     "email": "info@thetechprepper.com"

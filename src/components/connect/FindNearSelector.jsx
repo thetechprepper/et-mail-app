@@ -54,7 +54,11 @@ export default function FindNearSelector({
   const [isSearching, setIsSearching] = useState(false);
   const [error, setError] = useState("");
 
-  const items = (results && results.length ? results : apiResults) || [];
+  const items = useMemo(() => {
+    return (results && results.length ? results : apiResults) || [];
+  }, [results, apiResults]);
+
+  const [reliabilityByUri, setReliabilityByUri] = useState({});
 
   const selectedStationFromItems =
     selectedUri ? (items || []).find((s) => s.uri === selectedUri) : null;
@@ -98,6 +102,73 @@ export default function FindNearSelector({
       cancelled = true;
     };
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function runPredictions() {
+      const latStr = String(near.lat || "").trim();
+      const lonStr = String(near.lon || "").trim();
+
+      if (!latStr || !lonStr || !Array.isArray(items) || items.length === 0) {
+        setReliabilityByUri({});
+        return;
+      }
+
+      const txLatLon = `${latStr},${lonStr}`;
+
+      const next = {};
+
+      for (const item of items) {
+        if (cancelled) return;
+
+        const uri = item && item.uri ? String(item.uri) : "";
+        if (!uri) continue;
+
+        const rxLatRaw =
+          item && item.lat !== undefined
+            ? item.lat
+            : (item && item.latitude !== undefined ? item.latitude : "");
+        const rxLonRaw =
+          item && item.lon !== undefined
+            ? item.lon
+            : (item && item.longitude !== undefined ? item.longitude : "");
+
+        const rxLat =
+          typeof rxLatRaw === "number" ? rxLatRaw : parseFloat(String(rxLatRaw).trim());
+        const rxLon =
+          typeof rxLonRaw === "number" ? rxLonRaw : parseFloat(String(rxLonRaw).trim());
+
+        if (!Number.isFinite(rxLat) || !Number.isFinite(rxLon)) {
+          next[uri] = "";
+          setReliabilityByUri({ ...next });
+          continue;
+        }
+
+        const rxLatLon = `${rxLat},${rxLon}`;
+
+        const frequency =
+          item && typeof item.frequency === "number" ? item.frequency : null;
+
+        const rel = await getPredictionForNow({
+          txLatLon,
+          rxLatLon,
+          power: 5,
+          mode: "vara-2300",
+          frequency
+        });
+
+        next[uri] = rel;
+        setReliabilityByUri({ ...next });
+      }
+    }
+
+    runPredictions();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [items, near.lat, near.lon]);
 
   const handleSearch = async () => {
     const lat = String(near.lat || "").trim();
@@ -424,6 +495,7 @@ export default function FindNearSelector({
             <Column key="bandwidth">Bandwidth</Column>
             <Column key="target">Target</Column>
             <Column key="frequency">Frequency</Column>
+            <Column key="reliability">Reliability</Column>
           </TableHeader>
 
           <TableBody items={items || []}>
@@ -434,6 +506,7 @@ export default function FindNearSelector({
                 <Cell>{item.bandwidth || ""}</Cell>
                 <Cell>{item.target || ""}</Cell>
                 <Cell>{formatFrequencyMHz(item.frequency)}</Cell>
+                <Cell>{(item && item.uri && reliabilityByUri[item.uri]) || ""}</Cell>
               </Row>
             )}
           </TableBody>
@@ -505,7 +578,9 @@ function mapNearResultToStation(r) {
     target: callsign,
     frequency: freq,
     uri,
-    address: ""
+    address: "",
+    lat: r && typeof r.lat === "number" ? r.lat : (r && typeof r.latitude === "number" ? r.latitude : undefined),
+    lon: r && typeof r.lon === "number" ? r.lon : (r && typeof r.longitude === "number" ? r.longitude : undefined)
   };
 }
 
@@ -573,5 +648,101 @@ async function safeJson(res) {
     return await res.json();
   } catch (e) {
     return {};
+  }
+}
+
+function parsePredictionForNow(voacapResponse, frequency) {
+  try {
+    if (!Array.isArray(voacapResponse) || voacapResponse.length < 24) {
+      return "";
+    }
+
+    const fNum =
+      typeof frequency === "number"
+        ? frequency
+        : parseFloat(String(frequency || "").trim());
+
+    if (!Number.isFinite(fNum) || fNum <= 0) return "";
+
+    // Accept either Hz (eg 10144000) or MHz (eg 10.144).
+    const freqMHz = fNum > 1000 ? (fNum / 1000000.0) : fNum;
+
+    const utcHour = new Date().getUTCHours(); // 0..23
+    const hourObj = voacapResponse[utcHour];
+    if (!hourObj || typeof hourObj !== "object") return "";
+
+    const freqRel = hourObj.freqRel;
+    if (!freqRel || typeof freqRel !== "object") return "";
+
+    const keys = Object.keys(freqRel);
+    if (!keys.length) return "";
+
+    let bestKey = "";
+    let bestDelta = Infinity;
+
+    for (const k of keys) {
+      const kMHz = parseFloat(k);
+      if (!Number.isFinite(kMHz)) continue;
+
+      const delta = Math.abs(kMHz - freqMHz);
+      if (delta < bestDelta) {
+        bestDelta = delta;
+        bestKey = k;
+      }
+    }
+
+    if (!bestKey) return "";
+
+    const rel = freqRel[bestKey];
+    if (typeof rel !== "number" || !Number.isFinite(rel)) return "";
+
+    let pct;
+
+    if (rel >= 0 && rel <= 1) {
+      pct = Math.round(rel * 100);
+    } else if (rel >= 0 && rel <= 100) {
+      pct = Math.round(rel);
+    } else {
+      return "";
+    }
+
+    if (pct < 0) pct = 0;
+    if (pct > 100) pct = 100;
+
+    return `${pct}%`;
+  } catch (e) {
+    return "";
+  }
+}
+
+async function getPredictionForNow({
+  txLatLon,
+  rxLatLon,
+  power,
+  mode,
+  frequency
+}) {
+  try {
+    const res = await fetch("http://localhost:1981/api/voacap", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        txLatLon,
+        rxLatLon,
+        power,
+        mode
+      })
+    });
+
+    if (!res.ok) {
+      return "";
+    }
+
+    const data = await safeJson(res);
+    return parsePredictionForNow(data, frequency);
+  } catch (e) {
+    return "";
   }
 }

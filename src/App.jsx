@@ -53,16 +53,6 @@ function App() {
   const MIN_RELIABILITY = 90; // Minimum reliability threshold
   const FUTURE_HOURS = 24;    // Number of hours for "Later"
 
-  const DEFAULT_ZOOM_REGION = 10; // Default zoom level for country-specific maps (i.e. US and CA).
-  const DEFAULT_ZOOM_WORLD = 6;   // Default zoom level for world map.
-
-  const [myPosition, setMyPosition] = useState([33.0, -112.0]);
-  const [center, setCenter] = useState([33.0, -112.0]);
-  const [zoom, setZoom] = useState(DEFAULT_ZOOM_WORLD);
-
-  const [useFallback, setUseFallback] = useState(false);
-  const [tileBaseUrl, setTileBaseUrl] = useState(null);
-
   const VIEW = {
     MAIL: "mail",
     WEATHER: "weather",
@@ -101,10 +91,6 @@ function App() {
   const [mode, setMode] = useState("js8"); // radio mode
 
   const [MailBoxesOpen, setMailBoxesOpen] = useState(true);
-
-  // Handle zoom level based on availability of offline regional vs world map
-  const getDefaultZoom = () => 
-    (tileBaseUrl?.includes('osm-world')) ? DEFAULT_ZOOM_WORLD : DEFAULT_ZOOM_REGION;
 
   const handleReset = () => {
     setSearchCallsign('');

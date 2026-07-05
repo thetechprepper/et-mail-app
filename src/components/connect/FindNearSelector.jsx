@@ -564,7 +564,6 @@ export default function FindNearSelector({
             <Column key="name">Name</Column>
             <Column key="transport">Transport</Column>
             <Column key="bandwidth">Bandwidth</Column>
-            <Column key="target">Target</Column>
             <Column key="frequency">Frequency</Column>
             <Column key="reliability">Reliability</Column>
           </TableHeader>
@@ -575,7 +574,6 @@ export default function FindNearSelector({
                 <Cell>{item.name || ""}</Cell>
                 <Cell>{item.transport || ""}</Cell>
                 <Cell>{item.bandwidth || ""}</Cell>
-                <Cell>{item.target || ""}</Cell>
                 <Cell>{formatFrequencyMHz(item.frequency)}</Cell>
                 <Cell>{item.reliability || ""}</Cell>
               </Row>
@@ -643,7 +641,7 @@ function mapNearResultToStation(r) {
   });
 
   return {
-    name: [callsign, mode, band].filter(Boolean).join(" - "),
+    name: callsign,
     transport,
     bandwidth,
     target: callsign,

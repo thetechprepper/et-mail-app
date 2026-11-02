@@ -27,7 +27,7 @@ export default function NWSForecastZonesListTable() {
         return res.json();
       })
       .then((data) => {
-        setZones(Array.isArray(data) ? data : []);
+        setZones(Array.isArray(data) ? data.slice(0, 1) : []);
       })
       .catch((err) => {
         console.error(err);

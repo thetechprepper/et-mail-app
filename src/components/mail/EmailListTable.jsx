@@ -21,7 +21,8 @@ import {
   ButtonGroup,
   MenuTrigger,
   Menu,
-  Flex
+  Flex,
+  ToastQueue
 } from "@adobe/react-spectrum";
 import Close from "@spectrum-icons/workflow/Close";
 
@@ -166,6 +167,29 @@ export default function EmailListTable() {
     setDetailLoading(false);
   }
 
+  const handleDelete = async () => {
+    if (!selectedMid) return;
+
+    try {
+      const detailPath = MAILBOX_DETAIL_PATH[mailbox];
+
+      const res = await fetch(
+        `http://localhost:8080/api/mailbox/${detailPath}/${encodeURIComponent(selectedMid)}`,
+        { method: "DELETE" }
+      );
+
+      if (!res.ok) {
+        throw new Error(`Delete failed: ${res.status}`);
+      }
+
+      setMessages((prev) => prev.filter((m) => m.MID !== selectedMid));
+      closeDialog();
+    } catch (err) {
+      console.error(err);
+      ToastQueue.negative("Failed to delete message", { timeout: 5000 });
+    }
+  };
+
   const fromText = messageDetail?.From?.Addr || "";
   const toText = Array.isArray(messageDetail?.To)
     ? messageDetail.To.map((x) => x?.Addr).filter(Boolean).join(", ")
@@ -253,7 +277,9 @@ export default function EmailListTable() {
             <ButtonGroup>
               <MenuTrigger>
                 <ActionButton>Actions</ActionButton>
-                <Menu>
+                <Menu onAction={(key) => {
+                  if (key === "delete") handleDelete();
+                }}>
                   <Item key="archive">Archive</Item>
                   <Item key="delete">Delete</Item>
                 </Menu>

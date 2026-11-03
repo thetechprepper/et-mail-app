@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import {
   TableView,
@@ -17,6 +18,9 @@ import {
   ProgressCircle,
   Text,
   ActionButton,
+  ButtonGroup,
+  MenuTrigger,
+  Menu,
   Flex
 } from "@adobe/react-spectrum";
 import Close from "@spectrum-icons/workflow/Close";
@@ -246,15 +250,23 @@ export default function EmailListTable() {
               </span>
             </Heading>
 
-            <ActionButton
-              isQuiet
-              aria-label="Close"
-              alignSelf="end"
-              marginStart="auto"
-              onPress={closeDialog}
-            >
-              <Close />
-            </ActionButton>
+            <ButtonGroup>
+              <MenuTrigger>
+                <ActionButton>Actions</ActionButton>
+                <Menu>
+                  <Item key="archive">Archive</Item>
+                  <Item key="delete">Delete</Item>
+                </Menu>
+              </MenuTrigger>
+
+              <ActionButton
+                isQuiet
+                aria-label="Close"
+                onPress={closeDialog}
+              >
+                <Close />
+              </ActionButton>
+            </ButtonGroup>
 
             <Divider />
 

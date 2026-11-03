@@ -209,12 +209,14 @@ export default function NWSForecastZonesListTable() {
                   </Button>
                 </Flex>
 
+                {/*
                 <Flex alignItems="center" justifyContent="space-between" gap="size-100">
                   <Text>Most Recent Hurricane</Text>
                   <Button variant="cta" isDisabled>
                     Request
                   </Button>
                 </Flex>
+		*/}
               </Flex>
             </View>
           );

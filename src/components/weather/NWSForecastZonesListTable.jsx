@@ -17,6 +17,7 @@ export default function NWSForecastZonesListTable() {
 
   // Optional: track per-row request state
   const [requestingKey, setRequestingKey] = useState(null);
+  const [requestingFloodKey, setRequestingFloodKey] = useState(null);
 
   useEffect(() => {
     setLoading(true);
@@ -87,6 +88,52 @@ export default function NWSForecastZonesListTable() {
     }
   };
 
+  const handleFloodWatchRequest = async (item) => {
+    const county = item?.county;
+    const state = item?.state;
+    const zone = item?.zone;
+
+    if (!state || !zone) return;
+
+    const rowKey = makeRowKey(item);
+    setRequestingFloodKey(rowKey);
+
+    try {
+      const params = new URLSearchParams();
+      params.append("state", state);
+      params.append("zone", zone);
+
+      const res = await fetch(
+        "http://localhost:1981/api/winlink/messages/weather/nws/flood-watch",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+          },
+          body: params.toString()
+        }
+      );
+
+      if (!res.ok) {
+        throw new Error(`Request failed: ${res.status}`);
+      }
+
+      ToastQueue.positive(
+        `Flood watch request sent for ${county}, ${state} zone ${zone}`,
+        { timeout: 5000 }
+      );
+    } catch (err) {
+      console.error(err);
+
+      ToastQueue.negative(
+        "Failed to post flood watch request to outbox",
+        { timeout: 5000 }
+      );
+    } finally {
+      setRequestingFloodKey(null);
+    }
+  };
+
   return (
     <View width="100%">
       {loading ? (
@@ -152,7 +199,12 @@ export default function NWSForecastZonesListTable() {
 
                 <Flex alignItems="center" justifyContent="space-between" gap="size-100">
                   <Text>Most Recent Flood Watch</Text>
-                  <Button variant="cta" isDisabled>
+                  <Button
+                    variant="cta"
+                    onPress={() => handleFloodWatchRequest(item)}
+                    isDisabled={!item?.state || !item?.zone}
+                    isPending={requestingFloodKey === rowKey}
+                  >
                     Request
                   </Button>
                 </Flex>

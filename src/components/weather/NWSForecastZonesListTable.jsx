@@ -1,11 +1,10 @@
+
 import { useEffect, useState } from "react";
 import {
-  TableView,
-  TableHeader,
-  TableBody,
-  Column,
-  Row,
-  Cell,
+  Flex,
+  View,
+  Text,
+  Divider,
   Button,
   ToastQueue
 } from "@adobe/react-spectrum";
@@ -88,45 +87,58 @@ export default function NWSForecastZonesListTable() {
   };
 
   return (
-    <TableView
-      aria-label="NWS forecast zones"
-      selectionMode="single"
-      isQuiet
-      width="100%"
-    >
-      <TableHeader>
-        <Column key="state">State</Column>
-        <Column key="county">County</Column>
-        <Column key="area">Area</Column>
-        <Column key="zone">Zone</Column>
-        <Column key="action">Action</Column>
-      </TableHeader>
-
-      <TableBody items={zones} loadingState={loading ? "loading" : "idle"}>
-        {(item) => {
+    <View width="100%">
+      {loading ? (
+        <Text>Loading NWS weather zone...</Text>
+      ) : zones.length === 0 ? (
+        <Text>No NWS weather zone found.</Text>
+      ) : (
+        zones.map((item) => {
           const rowKey = makeRowKey(item);
           const isRequesting = requestingKey === rowKey;
 
           return (
-            <Row key={rowKey}>
-              <Cell>{item.state || ""}</Cell>
-              <Cell>{item.county || ""}</Cell>
-              <Cell>{item.name || ""}</Cell>
-              <Cell>{item.zone || ""}</Cell>
-              <Cell>
-                <Button
-                  variant="cta"
-                  onPress={() => handleRequest(item)}
-                  isDisabled={!item?.state || !item?.zone}
-                  isPending={isRequesting}
-                >
-                  Request
-                </Button>
-              </Cell>
-            </Row>
+            <View key={rowKey}>
+              <Flex direction="column" gap="size-100">
+                <Text><strong>State:</strong> {item.state || ""}</Text>
+                <Text><strong>County:</strong> {item.county || ""}</Text>
+                <Text><strong>Area:</strong> {item.name || ""}</Text>
+                <Text><strong>Zone:</strong> {item.zone || ""}</Text>
+              </Flex>
+
+              <Divider size="S" marginTop="size-200" marginBottom="size-200" />
+
+              <Flex direction="column" gap="size-150">
+                <Flex alignItems="center" justifyContent="space-between" gap="size-100">
+                  <Text>5-Day Weather Forecast</Text>
+                  <Button
+                    variant="cta"
+                    onPress={() => handleRequest(item)}
+                    isDisabled={!item?.state || !item?.zone}
+                    isPending={isRequesting}
+                  >
+                    Request
+                  </Button>
+                </Flex>
+
+                <Flex alignItems="center" justifyContent="space-between" gap="size-100">
+                  <Text>Most Recent Flood Watch</Text>
+                  <Button variant="cta" isDisabled>
+                    Request
+                  </Button>
+                </Flex>
+
+                <Flex alignItems="center" justifyContent="space-between" gap="size-100">
+                  <Text>Most Recent Hurricane</Text>
+                  <Button variant="cta" isDisabled>
+                    Request
+                  </Button>
+                </Flex>
+              </Flex>
+            </View>
           );
-        }}
-      </TableBody>
-    </TableView>
+        })
+      )}
+    </View>
   );
 }

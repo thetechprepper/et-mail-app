@@ -12,6 +12,7 @@ import {
   View,
   DialogContainer,
   Dialog,
+  AlertDialog,
   Heading,
   Content,
   Divider,
@@ -53,6 +54,7 @@ export default function EmailListTable() {
   const [messageDetail, setMessageDetail] = useState(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailError, setDetailError] = useState("");
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -278,7 +280,7 @@ export default function EmailListTable() {
               <MenuTrigger>
                 <ActionButton>Actions</ActionButton>
                 <Menu onAction={(key) => {
-                  if (key === "delete") handleDelete();
+                  if (key === "delete") setIsDeleteConfirmOpen(true);
                 }}>
                   <Item key="archive">Archive</Item>
                   <Item key="delete">Delete</Item>
@@ -355,6 +357,21 @@ export default function EmailListTable() {
               )}
             </Content>
           </Dialog>
+        )}
+      </DialogContainer>
+
+      <DialogContainer onDismiss={() => setIsDeleteConfirmOpen(false)}>
+        {isDeleteConfirmOpen && (
+          <AlertDialog
+            title="Delete Message"
+            variant="destructive"
+            primaryActionLabel="Delete"
+            cancelLabel="Cancel"
+            autoFocusButton="cancel"
+            onPrimaryAction={handleDelete}
+          >
+            Are you sure you want to delete this message?
+          </AlertDialog>
         )}
       </DialogContainer>
     </View>

@@ -4,6 +4,7 @@ import {
   Flex,
   View,
   Text,
+  Heading,
   Divider,
   Button,
   ToastQueue
@@ -99,14 +100,42 @@ export default function NWSForecastZonesListTable() {
 
           return (
             <View key={rowKey}>
-              <Flex direction="column" gap="size-100">
-                <Text><strong>State:</strong> {item.state || ""}</Text>
-                <Text><strong>County:</strong> {item.county || ""}</Text>
-                <Text><strong>Area:</strong> {item.name || ""}</Text>
-                <Text><strong>Zone:</strong> {item.zone || ""}</Text>
+              <Heading level={2} marginTop="size-0" marginBottom="size-50">
+                NWS Weather
+              </Heading>
+              <Text>U.S. National Weather Service</Text>
+
+              <Divider size="S" marginTop="size-200" marginBottom="size-200" />
+
+              <Flex direction="row" gap="size-400">
+                <Flex direction="column" flex="1" gap="size-200">
+                  <Flex direction="column" gap="size-50">
+                    <Text><strong>State</strong></Text>
+                    <Text>{item.state || ""}</Text>
+                  </Flex>
+                  <Flex direction="column" gap="size-50">
+                    <Text><strong>Area</strong></Text>
+                    <Text>{item.name || ""}</Text>
+                  </Flex>
+                </Flex>
+
+                <Flex direction="column" flex="1" gap="size-200">
+                  <Flex direction="column" gap="size-50">
+                    <Text><strong>County</strong></Text>
+                    <Text>{item.county || ""}</Text>
+                  </Flex>
+                  <Flex direction="column" gap="size-50">
+                    <Text><strong>Zone</strong></Text>
+                    <Text>{item.zone || ""}</Text>
+                  </Flex>
+                </Flex>
               </Flex>
 
               <Divider size="S" marginTop="size-200" marginBottom="size-200" />
+
+              <Heading level={3} marginTop="size-0" marginBottom="size-100">
+                Weather Products
+              </Heading>
 
               <Flex direction="column" gap="size-150">
                 <Flex alignItems="center" justifyContent="space-between" gap="size-100">

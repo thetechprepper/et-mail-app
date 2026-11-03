@@ -390,7 +390,6 @@ function App() {
             {/* Weather Request */}
 	    {activeView === VIEW.WEATHER && (
               <View padding="size-200">
-                <Text>Request weather from the U.S. National Weather Service (NWS)</Text>
 		<NWSForecastZonesListTable/>
               </View>
             )}
